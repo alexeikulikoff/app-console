@@ -1,0 +1,25 @@
+<form [formGroup]="addressForm" novalidate (ngSubmit)="onSubmit()">
+  <mat-card class="shipping-card">
+    <mat-card-header>
+      <mat-card-title>Menu item role mapping</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+  
+      <div class="row">
+        <div class="col">
+          <mat-form-field style="width:25vw">
+           <mat-label>User Roles:</mat-label>
+            <mat-select  placeholder="State" formControlName="state"  (ngModelChange)= "change($event)">
+              <mat-option *ngFor="let state of states" [value]="state.id" >
+                {{ state.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="addressForm.controls['state'].hasError('required')">
+              State is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</form>
