@@ -4,9 +4,22 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { AppModule } from './app/app.module';
 import { environment } from './environments/environment';
 
-if (environment.production) {
-  enableProdMode();
-}
+import { KeycloakService } from './app/_core/services/keycloak.service';
 
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+//if (environment.production) {
+ // enableProdMode();
+//}
+
+//platformBrowserDynamic().bootstrapModule(AppModule)
+//  .catch(err => console.error(err));
+
+KeycloakService.init()
+.then(() => {
+
+  if (environment.production) {
+    enableProdMode();
+  }
+
+  platformBrowserDynamic().bootstrapModule(AppModule);
+})
+.catch(err => console.error(err));

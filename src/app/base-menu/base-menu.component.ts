@@ -4,12 +4,30 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import { MatTreeModule } from '@angular/material/tree';
 
+import { FormBuilder, Validators } from '@angular/forms';
+
+import { BaseMenuService } from '../_core/services/api/base-menu/service';
+
+import { MenuNodes } from '../../app/_core/models/menuNode';
+import { MenuNode }  from '../../app/_core/models/menuNode';
+
+import { Observable } from 'rxjs';
+
+const NULL = "00000000-0000-0000-0000-000000000000";
+
+type menuItems = Array< { p: number, text: string, q: number } >;
 
 
-
-type menuItems = Array< { p: number, text: string, q:number } >;
-
-type NodeType = { name : string, p: string, children : Array<NodeType> }
+type NodeType = { 
+	p: string,
+  	name: string;
+  	image: string;
+  	position: number,
+  	so : number,
+  	url : string,
+	q: string
+   	children : Array<NodeType> 
+}
 
 
 
@@ -28,9 +46,14 @@ interface FoodNode {
 const TREE_DATA = [];
 
 let FoodNode : NodeType = {
-  name : "root",
-  p : "",
-  children : []
+	p : "",
+	name: "ROOT",
+  	image: "",
+  	position: 0,
+  	so : 0,
+  	url : "",
+	q : "",
+  	children : []
 };
 
 
@@ -48,7 +71,29 @@ interface ExampleFlatNode {
 })
 
 export class BaseMenuComponent {
- data : menuItems = [
+	
+ addressForm = this.fb.group({
+   
+    state: [null, Validators.required],
+  });
+
+  selected: number = 1;
+
+  hasUnitNumber = false;
+
+  states = [
+    {id : 1, name: 'Alabama', abbreviation: 'AL'},
+    {id : 2, name: 'Alaska', abbreviation: 'AK'},
+    {id : 3, name: 'American Samoa', abbreviation: 'AS'},
+    {id : 4, name: 'Arizona', abbreviation: 'AZ'},
+    {id : 5, name: 'Arkansas', abbreviation: 'AR'},
+    
+  ];
+	
+	
+	
+	
+ data1 : menuItems = [
     {p: 1, text: 'Sentence 1', q: 0},
     {p: 2, text: 'Sentence 2', q: 0},
     {p: 3, text: 'Sentence 3', q: 0},
@@ -80,31 +125,58 @@ export class BaseMenuComponent {
 
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-  constructor() { 
+  constructor(private fb: FormBuilder,  private baseMenuService : BaseMenuService) { 
+  
+	var nodes: Observable<MenuNodes> =  baseMenuService.getBaseMenu();
+  
+	nodes.subscribe(data=>{
+
+	 	const NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
+			return menuNodes.filter(s => {
+				return s.q === p;
+			});
+		 }
+		const fill = (data: MenuNodes, p : string, node : NodeType) => {
+		
+		    NodeList(data, p).forEach( s => {
+		      let p1 = s.p;
+		      var newNode: NodeType = 
+				{	p: s.p,
+			  		name: s.name,
+			  		image: s.image,
+			  		position: s.position,
+			  		so : s.so,
+			  		url : s.url,
+					q: s.q,
+			   		children: []
+				};
+		
+		      node.children.push(newNode);
+
+		      fill(data,p1,newNode );
+		    })
+ 		 }
 	
-	 this.fill(0, FoodNode );
+	 	fill(data, NULL , FoodNode );
+	 	
+		TREE_DATA.push(FoodNode);
 
-     TREE_DATA.push(FoodNode);
-
-    this.dataSource.data = TREE_DATA;
-
-     console.log(TREE_DATA);
-	this.dataSource.data = TREE_DATA;
+     	this.dataSource.data = TREE_DATA;
+	
+	 });
+	
   }
 
-  
+   change( event ) : void{
+	  console.log('chabge');
+ 	  this.selected = event;
+  	  console.log(this.selected);
+	
+  }
 
   hasChild = (_: number, node: ExampleFlatNode) => node.expandable;
   
-  fill = function(p : number, node : NodeType){
-    let items = this.getList(p);
-    items.forEach( s => {
-      let p1 = s.p;
-      let newNode = { name : s.text , p : s.p, children: []};
-      node.children.push(newNode);
-      this.fill(p1,newNode );
-    })
-  }
+ 
 
   getRoot = function(arr :  menuItems) : menuItems {
 
@@ -113,17 +185,16 @@ export class BaseMenuComponent {
 	});
   }
 
-  getList = function( p : number) : menuItems {
-
-	return  this.data.filter(s => {
-		return s.q === p;
-	});
-  }
+ 
 
   accessButton(newparam : HTMLInputElement):boolean{
-    console.log(newparam);
+    console.log(this.selected);
+    console.log(newparam.value);
+ 	
     return false;
   }
-
+ onSubmit() {
+    console.log();
+  }
 
 }

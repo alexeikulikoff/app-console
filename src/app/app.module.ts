@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,6 +19,12 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { BtnAssignComponent } from './btn-assign/btn-assign.component';
 import { StoreModule } from '@ngrx/store';
 import { reducers, metaReducers } from './reducers';
+
+import { AuthGuard } from './_core/guards';
+import { AuthInterceptor } from './_core/interceptors/auth.interceptor';
+import { KeycloakService } from './_core/services/keycloak.service';
+
+
 
 
 @NgModule({
@@ -42,12 +48,21 @@ import { reducers, metaReducers } from './reducers';
 	MatRadioModule,
 	MatCardModule,
 	ReactiveFormsModule,
+	HttpClientModule,
 	StoreModule.forRoot(reducers, {
       metaReducers
     })
 	
   ],
-  providers: [],
+  providers: [
+	KeycloakService,
+	 AuthGuard,
+	  {
+	    provide: HTTP_INTERCEPTORS,
+	    useClass: AuthInterceptor,
+	    multi: true
+	  },
+	],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

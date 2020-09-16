@@ -3,7 +3,25 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+	
+  appUrl: 'http://192.168.231.252:4800',
+  production: false,
+  serverUrl: 'http://172.16.0.157:15444',
+  mockUrl: 'assets/mocks/',
+  yaApiKey: '3aa58c76-e1b5-4ece-93ac-778cbf194482',
+  ip: '192.168.231.252',
+  port: '4800',
+  keycloakConfig: {
+    'url': 'http://172.16.0.157:8180/auth',
+    'realm': 'sys101-dev-eureka-main',
+    'auth-server-url': 'http://172.16.0.157:8180/auth',
+    'ssl-required': 'none',
+    'public-client': true,
+    'confidential-port': 0,
+    'clientId': 'sys101_gui_angular_client_admin'
+  }	
+	
+  
 };
 
 /*
