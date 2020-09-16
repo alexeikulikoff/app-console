@@ -1,5 +1,9 @@
-import { Component } from '@angular/core';
+import { Component,Output,EventEmitter } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { bindMenuRole } from '../actions/base-menu.action';
+
+import * as reduser from '../reducers';
 
 @Component({
   selector: 'app-role-selector',
@@ -8,6 +12,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 })
 export class RoleSelectorComponent {
  
+
  addressForm = this.fb.group({
    
     state: [null, Validators.required],
@@ -26,12 +31,15 @@ export class RoleSelectorComponent {
     
   ];
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private store: Store<reduser.State>) {}
   
   change( event ) : void{
 	  console.log('chabge');
  	  const selectedTown = event;
   	  console.log(selectedTown);
+	  this.store.dispatch(bindMenuRole({ menuId: '123', roleId: '45655' }))
+	 
+	
   }
   selectOption(id: number) {
     //getted from event

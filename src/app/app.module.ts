@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BaseMenuComponent } from './base-menu/base-menu.component';
@@ -16,6 +17,9 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BtnAssignComponent } from './btn-assign/btn-assign.component';
+import { StoreModule } from '@ngrx/store';
+import { reducers, metaReducers } from './reducers';
+
 
 @NgModule({
   declarations: [
@@ -26,6 +30,7 @@ import { BtnAssignComponent } from './btn-assign/btn-assign.component';
     BtnAssignComponent
   ],
   imports: [
+	
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -36,7 +41,10 @@ import { BtnAssignComponent } from './btn-assign/btn-assign.component';
 	MatSelectModule,
 	MatRadioModule,
 	MatCardModule,
-	ReactiveFormsModule
+	ReactiveFormsModule,
+	StoreModule.forRoot(reducers, {
+      metaReducers
+    })
 	
   ],
   providers: [],
