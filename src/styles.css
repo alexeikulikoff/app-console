@@ -2,6 +2,11 @@
 
 @import '~bootstrap/dist/css/bootstrap.min.css';
 
+.mat-form-field + .mat-form-field {
+  margin-left: 8px;
+}
+
+
 .full-width {
   width: 100%;
 }

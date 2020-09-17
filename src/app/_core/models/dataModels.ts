@@ -11,3 +11,9 @@ export interface MenuNode {
 }
 
 export interface MenuNodes extends Array<MenuNode>{}
+
+export interface Role {
+	id: string,
+	name: string
+}
+export interface Roles extends Array<Role>{}

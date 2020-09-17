@@ -13,6 +13,7 @@ import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -47,6 +48,7 @@ import { KeycloakService } from './_core/services/keycloak.service';
 	MatSelectModule,
 	MatRadioModule,
 	MatCardModule,
+	MatExpansionModule,
 	ReactiveFormsModule,
 	HttpClientModule,
 	StoreModule.forRoot(reducers, {

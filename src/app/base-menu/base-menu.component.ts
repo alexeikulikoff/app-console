@@ -1,34 +1,25 @@
 import { Component } from '@angular/core';
-import { NgModule } from '@angular/core';
-import {FlatTreeControl} from '@angular/cdk/tree';
-import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
-import { MatTreeModule } from '@angular/material/tree';
-
+import { FlatTreeControl} from '@angular/cdk/tree';
+import { MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import { FormBuilder, Validators } from '@angular/forms';
-
 import { BaseMenuService } from '../_core/services/api/base-menu/service';
-
-import { MenuNodes } from '../../app/_core/models/menuNode';
-import { MenuNode }  from '../../app/_core/models/menuNode';
-
+import { RoleService } from '../_core/services/api/roles/service';
+import { MenuNodes,  Roles } from '../../app/_core/models/dataModels';
 import { Observable } from 'rxjs';
+import { RoleMenuService } from '../../app/_core/services/api/role-menu/role-menu.service';
 
-const NULL = "00000000-0000-0000-0000-000000000000";
+const NULL = '00000000-0000-0000-0000-000000000000';
 
-type menuItems = Array< { p: number, text: string, q: number } >;
-
-
-type NodeType = { 
-	p: string,
-  	name: string;
-  	image: string;
-  	position: number,
-  	so : number,
-  	url : string,
-	q: string
-   	children : Array<NodeType> 
-}
-
+type NodeType = {
+  p: string,
+  name: string;
+  image: string;
+  position: number,
+  so: number,
+  url: string,
+  q: string
+  children: Array<NodeType>
+};
 
 
 /**
@@ -43,17 +34,30 @@ interface FoodNode {
 }
 */
 
-const TREE_DATA = [];
 
-let FoodNode : NodeType = {
-	p : "",
-	name: "ROOT",
-  	image: "",
-  	position: 0,
-  	so : 0,
-  	url : "",
-	q : "",
-  	children : []
+const TREE_DATA = [];
+const TREE_DATA_MAP = [];
+
+const FoodNode: NodeType = {
+  p: '',
+  name: 'ROOT',
+  image: '',
+  position: 0,
+  so: 0,
+  url: '',
+  q: '',
+  children : []
+};
+
+const FoodNodeMap: NodeType = {
+  p: '',
+  name: 'ROOT',
+  image: '',
+  position: 0,
+  so: 0,
+  url: '',
+  q: '',
+  children : []
 };
 
 
@@ -64,137 +68,156 @@ interface ExampleFlatNode {
   level: number;
 }
 
+
+const NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
+
+    let arr =  menuNodes.filter(s => {
+      return s.q === p;
+    });
+	return arr;
+};
+const fill = (data: MenuNodes, p: string, node: NodeType) => {
+   NodeList(data, p).forEach( s => {
+       const p1 = s.p;
+       const newNode: NodeType = {	p: s.p,
+       name: s.name,
+       image: s.image,
+       position: s.position,
+       so : s.so,
+       url : s.url,
+       q: s.q,
+       children: []
+    };
+    node.children.push(newNode);
+    fill(data, p1, newNode );
+    });
+};
+
+
 @Component({
   selector: 'app-base-menu',
   templateUrl: './base-menu.component.html',
   styleUrls: ['./base-menu.component.css']
 })
 
+
+
 export class BaseMenuComponent {
-	
- addressForm = this.fb.group({
+  
+  roleId: string;
+  menuId: string; 
+  menuMapId: string; 
+  menuRoles : MenuNodes;
+
+  constructor(private fb: FormBuilder,  private baseMenuService: BaseMenuService, private roleService: RoleService, private roleMenuService: RoleMenuService ) {
    
-    state: [null, Validators.required],
-  });
-
-  selected: number = 1;
-
-  hasUnitNumber = false;
-
-  states = [
-    {id : 1, name: 'Alabama', abbreviation: 'AL'},
-    {id : 2, name: 'Alaska', abbreviation: 'AK'},
-    {id : 3, name: 'American Samoa', abbreviation: 'AS'},
-    {id : 4, name: 'Arizona', abbreviation: 'AZ'},
-    {id : 5, name: 'Arkansas', abbreviation: 'AR'},
+ 	const nodes: Observable<MenuNodes> =  baseMenuService.getBaseMenu();
+    const roleList: Observable<Roles> = roleService.getAllRoles();
     
-  ];
+	roleList.subscribe(role => {
+		this.roles = role;
+		this.roleId = this.roles[0].id;
+		this.loadRoleMenuMap(this.roleId);
+    });
 	
-	
-	
-	
- data1 : menuItems = [
-    {p: 1, text: 'Sentence 1', q: 0},
-    {p: 2, text: 'Sentence 2', q: 0},
-    {p: 3, text: 'Sentence 3', q: 0},
-    {p: 4, text: 'Sentence 4', q: 1},
-    {p: 5, text: 'Sentence 5', q: 1},
-    {p: 6, text: 'Sentence 6', q: 1},
-    {p: 7, text: 'Sentence 7', q: 2},
-    {p: 8, text: 'Sentence 9', q: 2},
-    {p: 9, text: 'Sentence 10', q: 3},
-  	{p: 10, text: 'Sentence 10', q: 9},
-  	{p: 11, text: 'Sentence 11', q: 9},
-	];
+    nodes.subscribe(data => {
+	  fill(data, NULL , FoodNode );
+      TREE_DATA.push(FoodNode);
+      this.dataSource.data = TREE_DATA;
+    });
+ }
 
+ panelOpenState = false;
 
+ rolMenuMapForm = this.fb.group({
+
+    role: [null, Validators.required],
+
+  });
+   
+    hasUnitNumber = false;
+
+    roles = [];
   private _transformer = (node: NodeType, level: number) => {
     return {
       expandable: !!node.children && node.children.length > 0,
       name: node.name,
- 	  p : node.p,
+      p : node.p,
       level: level,
     };
   }
 
   treeControl = new FlatTreeControl<ExampleFlatNode>(
-      node => node.level, node => node.expandable);
+    node => node.level, node => node.expandable);
 
   treeFlattener = new MatTreeFlattener(
-      this._transformer, node => node.level, node => node.expandable, node => node.children);
+    this._transformer, node => node.level, node => node.expandable, node => node.children);
 
-  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
-
-  constructor(private fb: FormBuilder,  private baseMenuService : BaseMenuService) { 
-  
-	var nodes: Observable<MenuNodes> =  baseMenuService.getBaseMenu();
-  
-	nodes.subscribe(data=>{
-
-	 	const NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
-			return menuNodes.filter(s => {
-				return s.q === p;
-			});
-		 }
-		const fill = (data: MenuNodes, p : string, node : NodeType) => {
-		
-		    NodeList(data, p).forEach( s => {
-		      let p1 = s.p;
-		      var newNode: NodeType = 
-				{	p: s.p,
-			  		name: s.name,
-			  		image: s.image,
-			  		position: s.position,
-			  		so : s.so,
-			  		url : s.url,
-					q: s.q,
-			   		children: []
-				};
-		
-		      node.children.push(newNode);
-
-		      fill(data,p1,newNode );
-		    })
- 		 }
-	
-	 	fill(data, NULL , FoodNode );
-	 	
-		TREE_DATA.push(FoodNode);
-
-     	this.dataSource.data = TREE_DATA;
-	
-	 });
-	
+  private _transformerMap = (node: NodeType, level: number) => {
+    return {
+      expandable: !!node.children && node.children.length > 0,
+      name: node.name,
+      p : node.p,
+      level: level,
+    };
   }
 
-   change( event ) : void{
-	  console.log('chabge');
- 	  this.selected = event;
-  	  console.log(this.selected);
+  treeControlMap = new FlatTreeControl<ExampleFlatNode>(
+    node => node.level, node => node.expandable);
+
+  treeFlattenerMap = new MatTreeFlattener(
+    this._transformerMap, node => node.level, node => node.expandable, node => node.children);
+
+  dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
+  dataSourceMap = new MatTreeFlatDataSource(this.treeControlMap, this.treeFlattenerMap);
+  
 	
+   loadRoleMenuMap( roleid: string ){
+	  TREE_DATA_MAP.splice(0,TREE_DATA_MAP.length);
+	  FoodNodeMap.children = [];
+	
+	  const obsRoleMenus : Observable<MenuNodes> =  this.roleMenuService.getRoleMenus(roleid);
+			obsRoleMenus.subscribe(rm => {
+				console.log(rm);
+				if (rm != null){
+					this.menuRoles = rm;
+					fill(this.menuRoles, NULL , FoodNodeMap );
+		    		TREE_DATA_MAP.push(FoodNodeMap);
+					
+				}
+				this.dataSourceMap.data = TREE_DATA_MAP;
+				this.treeControlMap.expandAll();
+		})
+		
+  }
+  change( event ): void{
+
+	  this.roleId = event.id;
+	  console.log(this.roleId );
+	  this.loadRoleMenuMap(this.roleId);
   }
 
   hasChild = (_: number, node: ExampleFlatNode) => node.expandable;
-  
- 
 
-  getRoot = function(arr :  menuItems) : menuItems {
-
-	return  arr.filter(s=> {
-		return s.q === 0;
+  assignMenu(newparam: HTMLInputElement): boolean{
+	this.menuId = newparam.value;
+	
+	const result: Observable<any> =  this.baseMenuService.assignMenu(this.menuId,this.roleId);
+	result.subscribe(r=>{
+		if (r.code == 200){
+		   this.loadRoleMenuMap(this.roleId);
+		}
 	});
-  }
-
- 
-
-  accessButton(newparam : HTMLInputElement):boolean{
-    console.log(this.selected);
-    console.log(newparam.value);
- 	
+	
     return false;
   }
- onSubmit() {
-    console.log();
+  deAssignMenu(newparam: HTMLInputElement): boolean{
+	this.roleId = newparam.value;
+	console.log(newparam);
+    return false;
   }
 
-}
+  onSubmit() {
+      console.log();
+  }
+ }
