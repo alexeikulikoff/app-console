@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Roles } from '../../../models/dataModels';
+import { Role } from '../../../models/dataModels';
 import { ApiService } from '../../sub/api.service';
 
 
@@ -21,6 +22,14 @@ export class RoleService {
 	
     return this.api.get(url);
   }
+  public update(role: Role) : Observable<any>{
+	
+	var url: string ='/api/guicontroller-auth/access/role/update';
+	
+	return this.api.post(url,role);
+	
+  }
+
 /*
   public create(data: any): Observable<any> {
     return this.api.post(`${CrudPath}/add`, data);

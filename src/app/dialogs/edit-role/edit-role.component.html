@@ -1,0 +1,22 @@
+<h1 mat-dialog-title>Редактировать роль {{data.name}}</h1>
+<div mat-dialog-content >
+  <p>Наименование:</p>
+  <mat-form-field>
+    <input matInput [(ngModel)]="data.name" value ="{{data.name}}" #name>
+  </mat-form-field>
+  <p>Описание:</p>
+  <mat-form-field style="width:36vw">
+    <input matInput [(ngModel)]="data.description" value ="{{data.description}}" #description>
+  </mat-form-field>
+   <p>id:</p>
+  <mat-form-field >
+     <input  matInput [(ngModel)]="data.id" value ="{{data.id}}" #id disabled>
+  </mat-form-field>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Отменить</button>
+  <button mat-button (click)="save(id, name, description)" cdkFocusInitial>Сохранить</button>
+</div>
+
+  

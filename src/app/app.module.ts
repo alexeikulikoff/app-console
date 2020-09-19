@@ -23,13 +23,18 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatTableModule } from '@angular/material/table'; 
 import { BtnAssignComponent } from './btn-assign/btn-assign.component';
 import { StoreModule } from '@ngrx/store';
 import { reducers, metaReducers } from './reducers';
-
+import { MatTooltipModule } from '@angular/material/tooltip'; 
 import { AuthGuard } from './_core/guards';
 import { AuthInterceptor } from './_core/interceptors/auth.interceptor';
 import { KeycloakService } from './_core/services/keycloak.service';
+import { RolesComponent } from './roles/roles.component';
+import { EditRoleComponent } from './dialogs/edit-role/edit-role.component';
+import { MatDialogModule } from '@angular/material/dialog'; 
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -40,7 +45,9 @@ import { KeycloakService } from './_core/services/keycloak.service';
     BaseMenuComponent,
     PreferedMenuComponent,
     RoleSelectorComponent,
-    BtnAssignComponent
+    BtnAssignComponent,
+    RolesComponent,
+    EditRoleComponent
   ],
   imports: [
 	
@@ -61,6 +68,10 @@ import { KeycloakService } from './_core/services/keycloak.service';
 	MatToolbarModule,
 	MatSidenavModule,
 	MatListModule,
+	MatTableModule,
+	MatTooltipModule,
+	MatDialogModule,
+	FormsModule,
 	StoreModule.forRoot(reducers, {
       metaReducers
     })

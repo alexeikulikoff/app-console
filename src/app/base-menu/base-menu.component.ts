@@ -3,7 +3,7 @@ import { FlatTreeControl} from '@angular/cdk/tree';
 import { MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import { FormBuilder, Validators } from '@angular/forms';
 import { BaseMenuService } from '../_core/services/api/base-menu/service';
-import { RoleService } from '../_core/services/api/roles/service';
+import { RoleService } from '../_core/services/api/roles/roles.service';
 import { MenuNodes,  Roles } from '../../app/_core/models/dataModels';
 import { Observable } from 'rxjs';
 import { RoleMenuService } from '../../app/_core/services/api/role-menu/role-menu.service';
