@@ -1,6 +1,4 @@
-<h1>Hello</h1>
-
-
+<!-- 
 <app-btn-assign></app-btn-assign>
 
 
@@ -10,5 +8,36 @@
 
 <app-base-menu></app-base-menu>
 
-
-
+ 
+ <mat-tab-group>
+  <mat-tab label="First"> Content 1 </mat-tab>
+  <mat-tab label="Second"> Content 2 </mat-tab>
+  <mat-tab label="Third"> Content 3 </mat-tab>
+</mat-tab-group>
+ 
+-->
+<div id="content" class="box">
+  <div class="card-body">
+<mat-tab-group>
+  <mat-tab label="Справочники">
+  <mat-tab-group>
+	  <mat-tab label="Пользователи">Пользователи </mat-tab>
+	  <mat-tab label="Роли">Роли</mat-tab>
+	  <mat-tab label="Базовое меню">Базовое меню</mat-tab>
+  </mat-tab-group>
+  
+   </mat-tab>
+  <mat-tab label="Ролевая модель">
+    <mat-tab-group>
+	  <mat-tab label="Роли и Меню">
+	    <app-base-menu></app-base-menu>
+	   </mat-tab>
+	  <mat-tab label="Роли и Пользователи">Роли Пользователи</mat-tab>
+	  <mat-tab label="Роли и Объекты">Роли и Объекты</mat-tab>
+  </mat-tab-group>
+  
+  </mat-tab>
+  
+</mat-tab-group>
+</div>
+</div>

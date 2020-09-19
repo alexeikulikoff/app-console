@@ -34,6 +34,13 @@ export class BaseMenuService {
 	
     return this.api.post(url, null);
   }
+  public deAssignMenu(nodeid: string, roleId : string){
+	
+		var url: string ='/api/guicontroller-auth/base/deassign?nodeid=' + nodeid + '&roleid=' + roleId;
+	
+    	return this.api.post(url, null);
+   }
+
 
   public create(data: any): Observable<any> {
     return this.api.post(`${CrudPath}/add`, data);

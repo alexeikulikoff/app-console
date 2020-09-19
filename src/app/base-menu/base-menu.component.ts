@@ -7,6 +7,8 @@ import { RoleService } from '../_core/services/api/roles/service';
 import { MenuNodes,  Roles } from '../../app/_core/models/dataModels';
 import { Observable } from 'rxjs';
 import { RoleMenuService } from '../../app/_core/services/api/role-menu/role-menu.service';
+import { ElementRef } from '@angular/core';
+
 
 const NULL = '00000000-0000-0000-0000-000000000000';
 
@@ -40,7 +42,7 @@ const TREE_DATA_MAP = [];
 
 const FoodNode: NodeType = {
   p: '',
-  name: 'ROOT',
+  name: '/',
   image: '',
   position: 0,
   so: 0,
@@ -51,7 +53,7 @@ const FoodNode: NodeType = {
 
 const FoodNodeMap: NodeType = {
   p: '',
-  name: 'ROOT',
+  name: '/',
   image: '',
   position: 0,
   so: 0,
@@ -109,8 +111,8 @@ export class BaseMenuComponent {
   menuMapId: string; 
   menuRoles : MenuNodes;
 
-  constructor(private fb: FormBuilder,  private baseMenuService: BaseMenuService, private roleService: RoleService, private roleMenuService: RoleMenuService ) {
-   
+  constructor(private el:ElementRef, private fb: FormBuilder,  private baseMenuService: BaseMenuService, private roleService: RoleService, private roleMenuService: RoleMenuService ) {
+ 
  	const nodes: Observable<MenuNodes> =  baseMenuService.getBaseMenu();
     const roleList: Observable<Roles> = roleService.getAllRoles();
     
@@ -124,9 +126,13 @@ export class BaseMenuComponent {
 	  fill(data, NULL , FoodNode );
       TREE_DATA.push(FoodNode);
       this.dataSource.data = TREE_DATA;
+	  this.treeControl.expandAll();
+
+	 
     });
  }
 
+ roleName: string = '';
  panelOpenState = false;
 
  rolMenuMapForm = this.fb.group({
@@ -178,7 +184,7 @@ export class BaseMenuComponent {
 	
 	  const obsRoleMenus : Observable<MenuNodes> =  this.roleMenuService.getRoleMenus(roleid);
 			obsRoleMenus.subscribe(rm => {
-				console.log(rm);
+			
 				if (rm != null){
 					this.menuRoles = rm;
 					fill(this.menuRoles, NULL , FoodNodeMap );
@@ -193,7 +199,8 @@ export class BaseMenuComponent {
   change( event ): void{
 
 	  this.roleId = event.id;
-	  console.log(this.roleId );
+	  this.roleName = event.name;
+	  
 	  this.loadRoleMenuMap(this.roleId);
   }
 
@@ -212,8 +219,14 @@ export class BaseMenuComponent {
     return false;
   }
   deAssignMenu(newparam: HTMLInputElement): boolean{
-	this.roleId = newparam.value;
-	console.log(newparam);
+
+	this.menuId = newparam.value;
+	const result: Observable<any> = this.baseMenuService.deAssignMenu(this.menuId,this.roleId);
+	result.subscribe(r=>{
+		if (r.code == 200){
+		   this.loadRoleMenuMap(this.roleId);
+		}
+	});
     return false;
   }
 

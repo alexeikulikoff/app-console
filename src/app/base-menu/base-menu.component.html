@@ -1,8 +1,4 @@
-<p>base menu works</p>
-
 <div class="col-lg-6">
-
-
 <mat-accordion>
   <mat-expansion-panel hideToggle>
     <mat-expansion-panel-header>
@@ -13,18 +9,18 @@
      ...
       </mat-panel-description>
     </mat-expansion-panel-header>
-<div class="row">  
+ 
+ <div class="row">
+  <div class="col-lg-6">
   <form [formGroup]="rolMenuMapForm" novalidate (ngSubmit)="onSubmit()">
   <mat-card class="shipping-card">
     <mat-card-header>
-      <mat-card-title>Menu item role mapping</mat-card-title>
+      <mat-card-title>Привязка роли к  меню</mat-card-title>
     </mat-card-header>
     <mat-card-content>
   
-      <div class="row">
-        <div class="col">
-          <mat-form-field style="width:25vw">
-           <mat-label>User Roles:</mat-label>
+          <mat-form-field style="width:12vw">
+           <mat-label>Роль:</mat-label>
             <mat-select  placeholder="Role" formControlName="role"  (ngModelChange)= "change($event)">
               <mat-option *ngFor="let role of roles" [value]="role" >
                 {{ role.name }}
@@ -34,12 +30,25 @@
               State is <strong>required</strong>
             </mat-error>
           </mat-form-field>
-        </div>
-      </div>
+      
     </mat-card-content>
   </mat-card>
 </form>
 </div>
+  <div class="col-lg-6">
+   <mat-card class="shipping-card">
+    <mat-card-header>
+ 
+      <mat-card-content>
+     
+      	 <mat-label><span *ngIf="roleName != ''" > Выбрана роль: {{roleName}}</span></mat-label>
+     
+       </mat-card-content>
+    </mat-card-header>
+   </mat-card>
+  </div>
+</div>
+
 
 <div class="row">
 <div class="col-lg-6">
@@ -48,7 +57,10 @@
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
     <!-- use a disabled button to provide padding for tree leaf -->
     <button mat-icon-button disabled></button>
-    <p>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button (click)="assignMenu(newparam)"  >-></button> </p>
+    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'"  mat-icon-button color="primary"  (click)="assignMenu(newparam)" 
+     aria-label="Перенести вправо" >
+      <mat-icon>arrow_right_alt</mat-icon>
+    </button> </span>
   </mat-tree-node>
   <!-- This is the tree node template for expandable nodes -->
   <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
@@ -58,7 +70,10 @@
         {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
       </mat-icon>
     </button>
-    <p>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button  (click)="assignMenu(newparam)"  >></button> </p>
+    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'" mat-icon-button color="primary"  (click)="assignMenu(newparam)" 
+     aria-label="Перенести вправо" >
+      <mat-icon>arrow_right</mat-icon>
+    </button> </span>
   </mat-tree-node>
 </mat-tree>
 </div> 
@@ -69,7 +84,9 @@
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
     <!-- use a disabled button to provide padding for tree leaf -->
     <button mat-icon-button disabled></button>
-    <p>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button (click)="deAssignMenu(newparam)"  >-></button> </p>
+    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'" mat-icon-button color="primary"  (click)="deAssignMenu(newparam)"  >
+      <mat-icon>highlight_off</mat-icon>
+    </button> </span>
   </mat-tree-node>
   <!-- This is the tree node template for expandable nodes -->
   <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
@@ -79,7 +96,11 @@
         {{treeControlMap.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
       </mat-icon>
     </button>
-    <p>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button  (click)="deAssignMenu(newparam)"  >></button> </p>
+    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'" mat-icon-button color="primary"  (click)="deAssignMenu(newparam)"  >
+      <mat-icon>highlight_off</mat-icon>
+    </button> </span>
+
+
   </mat-tree-node>
 </mat-tree>
 </div> 

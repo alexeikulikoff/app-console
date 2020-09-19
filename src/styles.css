@@ -1,6 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
-
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 @import '~bootstrap/dist/css/bootstrap.min.css';
+
+.mat-button.mat-primary, .mat-icon-button.mat-primary, .mat-stroked-button.mat-primary{
+	color: red !important;
+}
 
 .mat-form-field + .mat-form-field {
   margin-left: 8px;

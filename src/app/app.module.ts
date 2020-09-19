@@ -12,6 +12,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { RoleSelectorComponent } from './role-selector/role-selector.component';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule     } from  '@angular/material/toolbar';
+import { MatSidenavModule }  from  '@angular/material/sidenav';
+import { MatListModule }  from  '@angular/material/list';
+
 import { MatSelectModule } from '@angular/material/select';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatRadioModule } from '@angular/material/radio';
@@ -51,6 +57,10 @@ import { KeycloakService } from './_core/services/keycloak.service';
 	MatExpansionModule,
 	ReactiveFormsModule,
 	HttpClientModule,
+	MatTabsModule,
+	MatToolbarModule,
+	MatSidenavModule,
+	MatListModule,
 	StoreModule.forRoot(reducers, {
       metaReducers
     })

@@ -1,0 +1,19 @@
+body {
+  position: relative;
+  height: auto;
+  min-height: 100% !important;
+}
+
+
+
+.box{
+	width : calc(100% - 36px); 
+	border: 2px solid #d3d7cf;
+	border-radius : 12px;
+	margin-left : 16px;
+	min-height: calc(100vh - 36px);
+	height: auto;
+	margin-top : 16px;
+
+		
+}
