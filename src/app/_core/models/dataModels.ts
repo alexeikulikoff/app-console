@@ -18,3 +18,9 @@ export interface Role {
   description: string;
 }
 export interface Roles extends Array<Role>{}
+
+export interface AddRole {
+  
+  name: string;
+  description: string;
+}

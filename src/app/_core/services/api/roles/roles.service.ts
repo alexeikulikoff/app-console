@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Roles } from '../../../models/dataModels';
-import { Role } from '../../../models/dataModels';
+import { Role, AddRole } from '../../../models/dataModels';
 import { ApiService } from '../../sub/api.service';
 
 
@@ -29,6 +29,18 @@ export class RoleService {
 	return this.api.post(url,role);
 	
   }
+ public save(role: AddRole) : Observable<any>{
+	
+	var url: string ='/api/guicontroller-auth/access/role';
+	
+	return this.api.post(url,role);
+	
+  }
+ public delete(id:string): Observable<any>{
+	
+	var url: string = '/api/guicontroller-auth/access/role/' + id;
+	return this.api.delete(url);
+} 
 
 /*
   public create(data: any): Observable<any> {

@@ -34,9 +34,10 @@ import { KeycloakService } from './_core/services/keycloak.service';
 import { RolesComponent } from './roles/roles.component';
 import { EditRoleComponent } from './dialogs/edit-role/edit-role.component';
 import { MatDialogModule } from '@angular/material/dialog'; 
+import { MatSortModule } from  '@angular/material/sort';
 import { FormsModule } from '@angular/forms';
-
-
+import { AddRoleComponent } from './dialogs/add-role/add-role.component';
+import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 
 
 @NgModule({
@@ -47,7 +48,8 @@ import { FormsModule } from '@angular/forms';
     RoleSelectorComponent,
     BtnAssignComponent,
     RolesComponent,
-    EditRoleComponent
+    EditRoleComponent,
+    AddRoleComponent
   ],
   imports: [
 	
@@ -72,15 +74,17 @@ import { FormsModule } from '@angular/forms';
 	MatTooltipModule,
 	MatDialogModule,
 	FormsModule,
+	MatSortModule,
 	StoreModule.forRoot(reducers, {
       metaReducers
     })
 	
   ],
   providers: [
-	KeycloakService,
+	 { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
+	 KeycloakService,
 	 AuthGuard,
-	  {
+	 {
 	    provide: HTTP_INTERCEPTORS,
 	    useClass: AuthInterceptor,
 	    multi: true

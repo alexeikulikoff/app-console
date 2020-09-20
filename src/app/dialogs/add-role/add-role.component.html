@@ -1,0 +1,19 @@
+<h1 mat-dialog-title>Добавить роль</h1>
+<div mat-dialog-content >
+  <p>Наименование:</p>
+  <mat-form-field>
+    <input matInput [(ngModel)]="role.name" value ="{{role.name}}" #name>
+  </mat-form-field>
+  <p>Описание:</p>
+  <mat-form-field style="width:36vw">
+    <input matInput [(ngModel)]="role.description" value ="{{role.description}}" #description>
+  </mat-form-field>
+  
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Отменить</button>
+  <button mat-button (click)="save(name, description)" cdkFocusInitial>Сохранить</button>
+</div>
+
+  

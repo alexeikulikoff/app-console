@@ -4,6 +4,7 @@ import { Role } from '../../_core/models/dataModels';
 import { RoleService } from '../../_core/services/api/roles/roles.service';
 import { Observable } from 'rxjs';
 
+
 @Component({
   selector: 'app-edit-role',
   templateUrl: './edit-role.component.html',
@@ -11,7 +12,7 @@ import { Observable } from 'rxjs';
 })
 export class EditRoleComponent implements OnInit {
 
-  constructor(public roleService: RoleService,
+  constructor(public roleService: RoleService, 
 	public dialogRef: MatDialogRef<EditRoleComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Role ) { }
 
@@ -24,11 +25,10 @@ export class EditRoleComponent implements OnInit {
 	
 	const role: Role = { id: elemId.value, name: elemName.value, description: elemDecription.value};
 	
-	console.log(role);
-	
 	var res: Observable<any> = this.roleService.update(role);
 	res.subscribe(r=>{
 		console.log(r);
+		
 	});
 	
 	this.dialogRef.close();
