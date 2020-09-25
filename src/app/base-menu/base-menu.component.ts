@@ -117,33 +117,37 @@ export class BaseMenuComponent {
   menuRoles : MenuNodes;
   flag: boolean;
   TREE_DATA = [];
+  data: MenuNodes;
+
   constructor(private el:ElementRef, private fb: FormBuilder,  private baseMenuService: BaseMenuService, private roleService: RoleService, private roleMenuService: RoleMenuService ) {
 
  	const nodes: Observable<MenuNodes> =  baseMenuService.getBaseMenu();
     const roleList: Observable<Roles> = roleService.getAllRoles();
-
+ 
 	roleList.subscribe(role => {
 		this.roles = role;
 		this.roleId = this.roles[0].id;
 		this.loadRoleMenuMap(this.roleId);
     });
 
-    nodes.subscribe(data => {
-	  fill(data, NULL , FoodNode );
-      this.TREE_DATA.push(FoodNode);
-	  
-      console.log(FoodNode);
-
-      this.dataSource.data = this.TREE_DATA;
-	  
-	  this.treeControl.expandAll();
-
-
+    nodes.subscribe(res => {
+	  this.data= res; 
+	  this.refreshData();
     });
+  
+    
 
 	this.flag = true;
  }
+ private refreshData(){
+	
+	  this.TREE_DATA.length = 0;
+	  fill(this.data, NULL , FoodNode );
+	  this.TREE_DATA.push(FoodNode);
+      this.dataSource.data = this.TREE_DATA;
+      
 
+}
  roleName: string = '';
  panelOpenState = false;
 
@@ -171,6 +175,8 @@ export class BaseMenuComponent {
 
   treeFlattener = new MatTreeFlattener(
     this._transformer, node => node.level, node => node.expandable, node => node.children);
+
+
 
   private _transformerMap = (node: NodeType, level: number) => {
     return {
@@ -200,8 +206,10 @@ export class BaseMenuComponent {
 
    }
   checkClick( p ): void{
+
 	console.log('checked box2');
 	console.log(p);
+	
   }
 
    loadRoleMenuMap( roleid: string ){

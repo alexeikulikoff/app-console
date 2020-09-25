@@ -30,6 +30,14 @@ export type MenuTree = {
   q : string
  
 }
+
+export type MenuTree2 = {
+  item: string; 
+
+  children: MenuTree2[];
+  
+}
+
 export interface Roles extends Array<Role>{}
 
 export interface AddRole {

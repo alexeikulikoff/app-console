@@ -3,32 +3,52 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Injectable} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject, throwError, of} from 'rxjs';
-import { MenuNodes, MenuTree } from '../_core/models/dataModels';
-import { environment } from 'src/environments/environment';
+import { MenuNodes, MenuTree, MenuTree2 } from '../_core/models/dataModels';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
-const TREE_DATA_BASE = [];
+
+
 const NULL = '00000000-0000-0000-0000-000000000000';
 const BASE_URL = environment.serverUrl;
 const urlBaseMenu = '/api/guicontroller-auth/base/list';
-
 /**
  * Node for to-do item
  */
 export class TodoItemNode {
   children: TodoItemNode[];
   item: string;
-  p: string;
-  image: string;
-  position: number;
-  so: number;
-  url: string;
-  q: string;
-
 }
 
+/** Flat to-do item node with expandable and level information */
+export class TodoItemFlatNode {
+  item: string;
+  level: number;
+  expandable: boolean;
+}
 
+/**
+ * The Json object for to-do list data.
+
+const TREE_DATA = {
+  Groceries: {
+    'Almond Meal flour': null,
+    'Organic eggs': null,
+    'Protein Powder': null,
+    Fruits: {
+      Apple: null,
+      Berries: ['Blueberry', 'Raspberry'],
+      Orange: null
+    }
+  },
+  Reminders: [
+    'Cook dinner',
+    'Read the Material Design spec',
+    'Upgrade Application to Angular'
+  ]
+};
+ */
 const MENU_DATA: MenuTree ={
 	    children: [],
  	   	item: 'ROOT',
@@ -41,52 +61,6 @@ const MENU_DATA: MenuTree ={
   		q : ''
 }
 
-const NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
-    let arr =  menuNodes.filter(s => {
-      return s.q === p;
-    });
-	return arr;
-};
-const hasChild = (nodes: MenuNodes , p: string): boolean => {
-    
-	return nodes.filter(s=> s.q === p).length > 0;
-};
-
-const fill = (data: MenuNodes, p: string, node: MenuTree) => {
-    
-	 NodeList(data, p).forEach( s => {
-        const p1 = s.p;
-        const nNode: MenuTree = {
-			p: s.p,
-			item: s.name,
-			name: s.name,
-			position: s.position,
-			so: s.so,
-			url: s.url,
-			q: s.q,
-			image : s.image,
-			children: []
-			
-		}
-//		if (hasChild(data, s.p)){
-//			nNode.children = [];
-//		}
-		node.children.push(nNode);
-        fill(data, p1, nNode );
-    });
-
-};
-
-/** Flat to-do item node with expandable and level information */
-export class TodoItemFlatNode {
-  item: string;
-  level: number;
-  expandable: boolean;
-}
-
-/**
- * The Json object for to-do list data.
- */
 const TREE_DATA = {
   Groceries: {
     'Almond Meal flour': null,
@@ -95,14 +69,8 @@ const TREE_DATA = {
     Fruits: {
       Apple: null,
       Berries: ['Blueberry', 'Raspberry'],
-      Orange:{
-			 Fruits: {
-      			Apple: null,
-     		 	Berries: ['Blueberry', 'Raspberry'],
-     		 	Orange: null
-   		 	}
-    	}
-	}
+      Orange: null
+    }
   },
   Reminders: [
     'Cook dinner',
@@ -118,34 +86,40 @@ const TREE_DATA = {
  */
 @Injectable()
 export class ChecklistDatabase {
-  
-  dataChange = new BehaviorSubject<MenuTree[]>([]);
-  
-  get data(): MenuTree[] { return this.dataChange.value; }
+  dataChange = new BehaviorSubject<TodoItemNode[]>([]);
 
-  constructor( private httpClient: HttpClient ) {
+  get data(): TodoItemNode[] { return this.dataChange.value; }
+
+  node1: TodoItemNode = new TodoItemNode();
+  constructor( private httpClient: HttpClient  ) {
     this.initialize();
   }
-
-  initialize() {
-
-    const arr = [];
-
-	this.LoadBaseMenu();
-	
-//	const data1 = this.buildFileTree(va, 0);
-   
-//	console.log(data1);
-	console.log(MENU_DATA);
-	const aa:  MenuTree = MENU_DATA;
-    arr.push(aa);
-
-   
-    this.dataChange.next(arr);
-	
+  MENU_DATA2: MenuTree2 ={
+ 	   	item: 'ROOT',
+    
+	    children: [],
 
   }
-  LoadBaseMenu( ): void {
+  initialize() {
+	
+    this.node1.item="root",
+    this.node1.children = [];
+
+	this.LoadBaseMenu( this.node1 );
+	
+/*	
+	 let arr = [];
+	 arr.push(this.node1);
+
+    const data = this.buildFileTree(TREE_DATA, 0);
+
+     console.log( arr );
+     console.log( data );
+  
+    this.dataChange.next(arr);
+*/
+  }
+  LoadBaseMenu( node: TodoItemNode ): void {
 
     const http$ = this.httpClient.get<MenuNodes>(`${BASE_URL}${urlBaseMenu}`);
     http$
@@ -162,7 +136,10 @@ export class ChecklistDatabase {
       )
       .subscribe(
 		res => {
-			   fill(res, NULL , MENU_DATA );
+			   this.fill(res, NULL , node );
+ 				let arr = [];
+	 			arr.push(this.node1);
+			    this.dataChange.next(arr);
 			},
 		
         err => console.log('HTTP Error', err),
@@ -171,18 +148,27 @@ export class ChecklistDatabase {
     ;
   }
 
+  NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
+    let arr =  menuNodes.filter(s => {
+      return s.q === p;
+    });
+	return arr;
+  };
+  hasChild = (nodes: MenuNodes , p: string): boolean => {
+    
+	return nodes.filter(s=> s.q === p).length > 0;
+  };
 
- 
-
-  /**
-   * Build the file structure tree. The `value` is the Json object, or a sub-tree of a Json object.
-   * The return value is the list of `TodoItemNode`.
-   */
-  buildFileTree(obj: {[key: string]: any}, level: number): MenuTree[] {
-    return Object.keys(obj).reduce<MenuTree[]>((accumulator, key) => {
-      const s = obj[key];
-    //  const node = new TodoItemNode();
-   	  const node: MenuTree = {
+  fill = (data: MenuNodes, p: string, node: TodoItemNode) => {
+    
+	 this.NodeList(data, p).forEach( s => {
+        const p1 = s.p;
+        const n = new TodoItemNode();
+	       n.item = s.name,
+		   n.children = []
+       
+/*
+        const nNode: MenuTree = {
 			p: s.p,
 			item: s.name,
 			name: s.name,
@@ -192,15 +178,32 @@ export class ChecklistDatabase {
 			q: s.q,
 			image : s.image,
 			children: []
-			
-		}
+*/			
+//		}
+//		if (hasChild(data, s.p)){
+//			nNode.children = [];
+//		}
+		node.children.push(n);
+        this.fill(data, p1, n );
+    });
+
+  };
+
+  /**
+   * Build the file structure tree. The `value` is the Json object, or a sub-tree of a Json object.
+   * The return value is the list of `TodoItemNode`.
+   */
+  buildFileTree(obj: {[key: string]: any}, level: number): TodoItemNode[] {
+    return Object.keys(obj).reduce<TodoItemNode[]>((accumulator, key) => {
+      const value = obj[key];
+      const node = new TodoItemNode();
       node.item = key;
 
-      if (s != null) {
-        if (typeof s === 'object') {
-          node.children = this.buildFileTree(s, level + 1);
+      if (value != null) {
+        if (typeof value === 'object') {
+          node.children = this.buildFileTree(value, level + 1);
         } else {
-          node.item = s.item;
+          node.item = value;
         }
       }
 
@@ -231,7 +234,7 @@ export class ChecklistDatabase {
   styleUrls: ['tree-checker.component.css'],
   providers: [ChecklistDatabase]
 })
-export class TreeCheckerComponent {
+export class TreeChecklistExample {
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<TodoItemFlatNode, TodoItemNode>();
 

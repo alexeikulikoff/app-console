@@ -86,33 +86,6 @@
 </mat-tree>
 </div>
 
-<div class="col-lg-6">
-<mat-tree [dataSource]="dataSourceMap" [treeControl]="treeControlMap" >
-  <!-- This is the tree node template for leaf nodes -->
-  <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
-    <!-- use a disabled button to provide padding for tree leaf -->
-    <button mat-icon-button disabled></button>
-    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'" mat-icon-button color="primary"  (click)="deAssignMenu(newparam)"  >
-      <mat-icon>highlight_off</mat-icon>
-    </button> </span>
-  </mat-tree-node>
-  <!-- This is the tree node template for expandable nodes -->
-  <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
-    <button mat-icon-button matTreeNodeToggle
-            [attr.aria-label]="'Toggle ' + node.name">
-      <mat-icon class="mat-icon-rtl-mirror">
-        {{treeControlMap.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-      </mat-icon>
-    </button>
-    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'" mat-icon-button color="primary"  (click)="deAssignMenu(newparam)"  >
-      <mat-icon>highlight_off</mat-icon>
-    </button> </span>
-
-
-  </mat-tree-node>
-</mat-tree>
-</div>
-
 
 </div>
   

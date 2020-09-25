@@ -39,7 +39,7 @@ import { FormsModule } from '@angular/forms';
 import { AddRoleComponent } from './dialogs/add-role/add-role.component';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { TreeCheckerComponent } from './tree-checker/tree-checker.component';
+import { TreeChecklistExample } from './tree-checker/tree-checker.component';
 
 
 @NgModule({
@@ -52,7 +52,7 @@ import { TreeCheckerComponent } from './tree-checker/tree-checker.component';
     RolesComponent,
     EditRoleComponent,
     AddRoleComponent,
-    TreeCheckerComponent
+    TreeChecklistExample
   ],
   imports: [
 
