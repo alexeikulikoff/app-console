@@ -19,7 +19,8 @@ type NodeType = {
   position: number,
   so: number,
   url: string,
-  q: string
+  q: string,
+  isOpen: boolean,
   children: Array<NodeType>
 };
 
@@ -37,7 +38,7 @@ interface FoodNode {
 */
 
 
-const TREE_DATA = [];
+//const TREE_DATA = [];
 const TREE_DATA_MAP = [];
 
 const FoodNode: NodeType = {
@@ -48,6 +49,7 @@ const FoodNode: NodeType = {
   so: 0,
   url: '',
   q: '',
+  isOpen: false,
   children : []
 };
 
@@ -59,6 +61,7 @@ const FoodNodeMap: NodeType = {
   so: 0,
   url: '',
   q: '',
+  isOpen: false,
   children : []
 };
 
@@ -68,6 +71,7 @@ interface ExampleFlatNode {
   expandable: boolean;
   name: string;
   level: number;
+ 
 }
 
 
@@ -88,10 +92,11 @@ const fill = (data: MenuNodes, p: string, node: NodeType) => {
        so : s.so,
        url : s.url,
        q: s.q,
+ 	   isOpen: true,
        children: []
     };
-    node.children.push(newNode);
-    fill(data, p1, newNode );
+       node.children.push(newNode);
+       fill(data, p1, newNode );
     });
 };
 
@@ -105,31 +110,38 @@ const fill = (data: MenuNodes, p: string, node: NodeType) => {
 
 
 export class BaseMenuComponent {
-  
-  roleId: string;
-  menuId: string; 
-  menuMapId: string; 
-  menuRoles : MenuNodes;
 
+  roleId: string;
+  menuId: string;
+  menuMapId: string;
+  menuRoles : MenuNodes;
+  flag: boolean;
+  TREE_DATA = [];
   constructor(private el:ElementRef, private fb: FormBuilder,  private baseMenuService: BaseMenuService, private roleService: RoleService, private roleMenuService: RoleMenuService ) {
- 
+
  	const nodes: Observable<MenuNodes> =  baseMenuService.getBaseMenu();
     const roleList: Observable<Roles> = roleService.getAllRoles();
-    
+
 	roleList.subscribe(role => {
 		this.roles = role;
 		this.roleId = this.roles[0].id;
 		this.loadRoleMenuMap(this.roleId);
     });
-	
+
     nodes.subscribe(data => {
 	  fill(data, NULL , FoodNode );
-      TREE_DATA.push(FoodNode);
-      this.dataSource.data = TREE_DATA;
+      this.TREE_DATA.push(FoodNode);
+	  
+      console.log(FoodNode);
+
+      this.dataSource.data = this.TREE_DATA;
+	  
 	  this.treeControl.expandAll();
 
-	 
+
     });
+
+	this.flag = true;
  }
 
  roleName: string = '';
@@ -140,7 +152,7 @@ export class BaseMenuComponent {
     role: [null, Validators.required],
 
   });
-   
+
     hasUnitNumber = false;
 
     roles = [];
@@ -149,6 +161,7 @@ export class BaseMenuComponent {
       expandable: !!node.children && node.children.length > 0,
       name: node.name,
       p : node.p,
+      isOpen: node.isOpen,
       level: level,
     };
   }
@@ -164,6 +177,7 @@ export class BaseMenuComponent {
       expandable: !!node.children && node.children.length > 0,
       name: node.name,
       p : node.p,
+      isOpen: node.isOpen,
       level: level,
     };
   }
@@ -176,31 +190,43 @@ export class BaseMenuComponent {
 
   dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
   dataSourceMap = new MatTreeFlatDataSource(this.treeControlMap, this.treeFlattenerMap);
-  
+ 
+  toggeItem(p){
+	  console.log('toggle box1');
+	  console.log(p); 
+  }
+  checkedCheckBox() : void{
 	
+
+   }
+  checkClick( p ): void{
+	console.log('checked box2');
+	console.log(p);
+  }
+
    loadRoleMenuMap( roleid: string ){
 	  TREE_DATA_MAP.splice(0,TREE_DATA_MAP.length);
 	  FoodNodeMap.children = [];
-	
+
 	  const obsRoleMenus : Observable<MenuNodes> =  this.roleMenuService.getRoleMenus(roleid);
 			obsRoleMenus.subscribe(rm => {
-			
+
 				if (rm != null){
 					this.menuRoles = rm;
 					fill(this.menuRoles, NULL , FoodNodeMap );
 		    		TREE_DATA_MAP.push(FoodNodeMap);
-					
+
 				}
 				this.dataSourceMap.data = TREE_DATA_MAP;
 				this.treeControlMap.expandAll();
 		})
-		
+
   }
   change( event ): void{
 
 	  this.roleId = event.id;
 	  this.roleName = event.name;
-	  
+
 	  this.loadRoleMenuMap(this.roleId);
   }
 
@@ -208,14 +234,14 @@ export class BaseMenuComponent {
 
   assignMenu(newparam: HTMLInputElement): boolean{
 	this.menuId = newparam.value;
-	
+
 	const result: Observable<any> =  this.baseMenuService.assignMenu(this.menuId,this.roleId);
 	result.subscribe(r=>{
 		if (r.code == 200){
 		   this.loadRoleMenuMap(this.roleId);
 		}
 	});
-	
+
     return false;
   }
   deAssignMenu(newparam: HTMLInputElement): boolean{

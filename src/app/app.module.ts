@@ -23,21 +23,23 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCardModule } from '@angular/material/card';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table'; 
+import { MatTableModule } from '@angular/material/table';
 import { BtnAssignComponent } from './btn-assign/btn-assign.component';
 import { StoreModule } from '@ngrx/store';
 import { reducers, metaReducers } from './reducers';
-import { MatTooltipModule } from '@angular/material/tooltip'; 
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AuthGuard } from './_core/guards';
 import { AuthInterceptor } from './_core/interceptors/auth.interceptor';
 import { KeycloakService } from './_core/services/keycloak.service';
 import { RolesComponent } from './roles/roles.component';
 import { EditRoleComponent } from './dialogs/edit-role/edit-role.component';
-import { MatDialogModule } from '@angular/material/dialog'; 
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatSortModule } from  '@angular/material/sort';
 import { FormsModule } from '@angular/forms';
 import { AddRoleComponent } from './dialogs/add-role/add-role.component';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { TreeCheckerComponent } from './tree-checker/tree-checker.component';
 
 
 @NgModule({
@@ -49,10 +51,11 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
     BtnAssignComponent,
     RolesComponent,
     EditRoleComponent,
-    AddRoleComponent
+    AddRoleComponent,
+    TreeCheckerComponent
   ],
   imports: [
-	
+
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
@@ -75,10 +78,11 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 	MatDialogModule,
 	FormsModule,
 	MatSortModule,
+    MatCheckboxModule,
 	StoreModule.forRoot(reducers, {
       metaReducers
     })
-	
+
   ],
   providers: [
 	 { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },

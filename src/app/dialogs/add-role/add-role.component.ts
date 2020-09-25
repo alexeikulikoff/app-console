@@ -14,12 +14,11 @@ import { Observable } from 'rxjs';
 export class AddRoleComponent implements OnInit {
 
   role: AddRole = { name: '', description: ''};
- 
   @Output() myEvent = new EventEmitter();
 
-  constructor(public roleService: RoleService, 
-	public dialogRef: MatDialogRef<AddRoleComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Role ) { }
+
+  // tslint:disable-next-line:max-line-length
+  constructor(public roleService: RoleService, public dialogRef: MatDialogRef<AddRoleComponent>, @Inject(MAT_DIALOG_DATA) public data: Role ) { }
 
   ngOnInit(): void {
   }
@@ -28,17 +27,20 @@ export class AddRoleComponent implements OnInit {
 	this.dialogRef.close();
   }
   save(elemName: HTMLInputElement, elemDecription: HTMLInputElement):void{
-	
-	const role: AddRole = { name: elemName.value, description: elemDecription.value};
-	if (role.name.length > 0){
-		var res: Observable<any> = this.roleService.save(role);
-		res.subscribe(r=>{
-			 this.myEvent.emit(null);	
-			 this.dialogRef.close();	
-		});
-		
-	}
 
-	
+    const role: AddRole = { name: elemName.value, description: elemDecription.value};
+    this.roleService.save(role);
+    this.dialogRef.close();
+	//if (role.name.length > 0){
+	//	var res: Observable<any> = this.roleService.save(role);
+	//	res.subscribe(r=>{
+  //     console.log(r);
+	//	  //this.myEvent.emit(null);
+	//		 this.dialogRef.close();
+	//	});
+
+
+
+
   }
 }

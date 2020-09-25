@@ -1,7 +1,7 @@
 // tslint:disable-next-line:no-submodule-imports
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 // tslint:disable-next-line:no-submodule-imports
 import { catchError, map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -21,6 +21,28 @@ export class ApiService {
     private httpClient: HttpClient
   ) {}
 
+
+  public post2(url: string, data): void {
+    const http$ = this.httpClient.post(`${BASE_URL}${url}`, data);
+
+    http$
+      .pipe(
+        map(res => res['payload']),
+        catchError(err => {
+          console.log('caught mapping error and rethrowing', err.status);
+          return throwError(err);
+        }),
+        catchError(err => {
+          console.log('caught rethrown error, providing fallback value', err);
+          return of([]);
+        })
+      )
+      .subscribe(
+        res => console.log('HTTP response', res),
+      //  err => console.log('HTTP Error', err),
+        () => console.log('HTTP request completed.')
+      );
+  }
   public post(url: string, data): Observable<any> {
     return this.httpClient
       .post(`${BASE_URL}${url}`, data, this.httpOptions)
@@ -69,6 +91,8 @@ export class ApiService {
     if (error.status === 401) {
       // location.reload();
       alert('401');
+    } else if (error.status === 409){
+       alert('409');
     } else {
       return throwError(error);
     }

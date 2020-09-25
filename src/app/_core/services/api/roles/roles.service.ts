@@ -14,33 +14,35 @@ export class RoleService {
     private api: ApiService
   ) { }
 
- 
+
 
   public getAllRoles(): Observable<Roles> {
-	
+
 	var url: string ='/api/guicontroller-auth/access/getRoles';
-	
+
     return this.api.get(url);
   }
   public update(role: Role) : Observable<any>{
-	
+
 	var url: string ='/api/guicontroller-auth/access/role/update';
-	
+
 	return this.api.post(url,role);
-	
+
   }
- public save(role: AddRole) : Observable<any>{
-	
-	var url: string ='/api/guicontroller-auth/access/role';
-	
-	return this.api.post(url,role);
-	
+ public save(role: AddRole){
+
+	var url: string ='/api/guicontroller-auth/access/role/save';
+
+   // tslint:disable-next-line:indent
+   //
+   this.api.post2(url, role);
+
   }
  public delete(id:string): Observable<any>{
-	
-	var url: string = '/api/guicontroller-auth/access/role/' + id;
+
+	var url: string = '/api/guicontroller-auth/access/role/delete/' + id;
 	return this.api.delete(url);
-} 
+}
 
 /*
   public create(data: any): Observable<any> {

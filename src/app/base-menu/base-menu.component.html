@@ -9,7 +9,7 @@
      ...
       </mat-panel-description>
     </mat-expansion-panel-header>
- 
+
  <div class="row">
   <div class="col-lg-6">
   <form [formGroup]="rolMenuMapForm" novalidate (ngSubmit)="onSubmit()">
@@ -18,7 +18,7 @@
       <mat-card-title>Привязка роли к  меню</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-  
+
           <mat-form-field style="width:12vw">
            <mat-label>Роль:</mat-label>
             <mat-select  placeholder="Role" formControlName="role"  (ngModelChange)= "change($event)">
@@ -30,7 +30,7 @@
               State is <strong>required</strong>
             </mat-error>
           </mat-form-field>
-      
+
     </mat-card-content>
   </mat-card>
 </form>
@@ -38,11 +38,11 @@
   <div class="col-lg-6">
    <mat-card class="shipping-card">
     <mat-card-header>
- 
+
       <mat-card-content>
-     
+
       	 <mat-label><span *ngIf="roleName != ''" > Выбрана роль: {{roleName}}</span></mat-label>
-     
+
        </mat-card-content>
     </mat-card-header>
    </mat-card>
@@ -57,26 +57,34 @@
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
     <!-- use a disabled button to provide padding for tree leaf -->
     <button mat-icon-button disabled></button>
-    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'"  mat-icon-button color="primary"  (click)="assignMenu(newparam)" 
-     aria-label="Перенести вправо" >
-      <mat-icon>arrow_right_alt</mat-icon>
-    </button> </span>
+     
+         <span> <mat-checkbox class="checklist-leaf-node"
+                  [checked]="node.isOpen"
+                  (change)="checkClick(node)">{{node.item}}
+      </mat-checkbox>
+		 {{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> 
+     </span>
   </mat-tree-node>
   <!-- This is the tree node template for expandable nodes -->
   <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding>
     <button mat-icon-button matTreeNodeToggle
-            [attr.aria-label]="'Toggle ' + node.name">
+            [attr.aria-label]="'Toggle ' + node.name" (click)="toggeItem(node)">
       <mat-icon class="mat-icon-rtl-mirror">
         {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
       </mat-icon>
     </button>
-    <span>{{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'" mat-icon-button color="primary"  (click)="assignMenu(newparam)" 
+    <span>
+    <mat-checkbox class="checklist-leaf-node"
+                  [checked]="node.isOpen"
+                  (change)="checkClick(node)">{{node.item}}
+      </mat-checkbox>
+    {{node.name}}<input type="hidden" value="{{node.p}}" name="param" #newparam> <button *ngIf="node.name != '/'" mat-icon-button color="primary"  (click)="assignMenu(newparam)"
      aria-label="Перенести вправо" >
       <mat-icon>arrow_right</mat-icon>
-    </button> </span>
+    </button>  </span>
   </mat-tree-node>
 </mat-tree>
-</div> 
+</div>
 
 <div class="col-lg-6">
 <mat-tree [dataSource]="dataSourceMap" [treeControl]="treeControlMap" >
@@ -103,12 +111,13 @@
 
   </mat-tree-node>
 </mat-tree>
-</div> 
+</div>
 
 
-</div> 
-  </mat-expansion-panel>
+</div>
   
+  </mat-expansion-panel>
+
 </mat-accordion>
 
 
