@@ -19,6 +19,7 @@ const urlBaseMenu = '/api/guicontroller-auth/base/list';
 export class TodoItempNode {
   children: TodoItempNode[];
   p: string;
+  q: string;
   item: string;
   selected: boolean;
 }
@@ -28,6 +29,7 @@ export class TodoItemFlatNode {
   item: string;
   level: number;
   p: string;
+  q:string;
   expandable: boolean;
   selected: boolean;
 }
@@ -55,9 +57,10 @@ const fill = (data: MenuNodes, p: string, node: TodoItempNode) => {
 	 NodeList(data, p).forEach( s => {
         const p1 = s.p;
         const n = new TodoItempNode();
-	       n.item = s.name,
-		   n.children = [],
-           n.p = s.p
+	       n.item = s.name;
+		   n.children = [];
+           n.p = s.p;
+           n.q = s.q;
 		   n.selected = true;
  		node.children.push(n);
         fill(data, p1, n );
@@ -109,7 +112,7 @@ export class TreeChecklistExample {
 
   get data(): TodoItempNode[] { return this.dataChange.value; }
 
-  tempNode: TempNode[];  
+
 
   constructor( private httpClient: HttpClient ) {
 	this.node1 = new TodoItempNode();
@@ -150,6 +153,7 @@ export class TreeChecklistExample {
 
   	flatNode.selected = node.selected;
   	flatNode.p = node.p;
+	flatNode.q = node.q;
     flatNode.item = node.item;
     flatNode.level = level;
     flatNode.expandable = !!node.children?.length;
@@ -183,10 +187,7 @@ export class TreeChecklistExample {
       .subscribe(
 		res => {
 			this.dbData = res;
-			this.tempNode = this.dbData.map(s=>{
-				return { p: s.p, q: s.q,  selected: true, name: s.name } ;
-			})
-			console.log(this.tempNode);
+		
 			this.updateNode(res,node);
 			this.setSelected();
 			},
@@ -197,14 +198,7 @@ export class TreeChecklistExample {
     ;
 	
    }
-  getTempNodeState(p:string): boolean{
-
-	  if (this.tempNode.length > 0){
-			return this.tempNode.filter(s=> s.p === p)[0].selected;	
-	  }else{
-	  	return true;	
-	}
-  }
+ 
  
   getDataSourceItem(node: TodoItempNode, p:string): TodoItempNode{
 	  return null;
@@ -230,9 +224,7 @@ export class TreeChecklistExample {
     
 	const descAllSelected = descendants.length > 0 && descendants.every(child => {
 	
-	  let f =  this.getTempNodeState(child.p);
-	
-      return this.checklistSelection.isSelected(child) || f ;
+      return this.checklistSelection.isSelected(child) ;
     });
 	  return descAllSelected ;
    
@@ -254,19 +246,31 @@ export class TreeChecklistExample {
  
   
   todoItemSelectionToggle(node: TodoItemFlatNode): void {
+	this.toggleChildred(node.p);
     this.checklistSelection.toggle(node);
     const descendants = this.treeControl.getDescendants(node);
-    this.checklistSelection.isSelected(node)
-      ? this.checklistSelection.select(...descendants)
-      : this.checklistSelection.deselect(...descendants);
+    console.log(descendants);
+    console.log(node);
+	
+	
+	node.selected ? 
+				  this.checklistSelection.select(...descendants) : 
+				  this.checklistSelection.deselect(...descendants);
+	/*
+	this.checklistSelection.isSelected(node) ? 
+				  this.checklistSelection.select(...descendants) : 
+				  this.checklistSelection.deselect(...descendants);
 
-    // Force update for the parent
+*/
+  
     descendants.forEach(child => {
 		this.checklistSelection.isSelected(child)
 	});
 		
     this.checkAllParentsSelection(node);
-   	this.toggleChildred(node.p);
+
+  
+	
 	this.toggleParent(node.p);
 	
   }
@@ -279,14 +283,15 @@ export class TreeChecklistExample {
 
   }
   saveAll(){
-	this.tempNode.forEach(s=>{
-		console.log(s.name + '  ' + s.selected);
-		
+	this.treeControl.dataNodes.forEach(s=>{
+		console.log(s);
 	})
-  }  
+  }
+  
   uuids: string[];
+
   findChildren(p){
-	const list = this.tempNode.filter(s=>s.q === p);
+	const list = this.treeControl.dataNodes.filter(s=>s.q === p);
     list.forEach(u=>{
 		p = u.p;
 		this.uuids.push(p);
@@ -296,35 +301,26 @@ export class TreeChecklistExample {
 
   toggleChildred = (p: string) => {
 	
-	const k = this.tempNode.findIndex((t => t.p == p));
-	
-	this.tempNode[k].selected = false;
+	const k = this.treeControl.dataNodes.findIndex((t => t.p == p));
+	this.treeControl.dataNodes[k].selected = !this.treeControl.dataNodes[k].selected;
 	
 	this.uuids = [];
 	this.findChildren(p);
 	this.uuids.forEach(u=>{
-		const i = this.tempNode.findIndex((t => t.p == u));
-		this.tempNode[i].selected = false;
-		console.log(this.tempNode[i].name + ' ' + this.tempNode[i].selected);
+		const i = this.treeControl.dataNodes.findIndex((t => t.p == u));
+		this.treeControl.dataNodes[i].selected = !this.treeControl.dataNodes[i].selected ;
+	
 	})
-    
+   
  }
  toggleParent = (p: string) => {
-	
-/*
-   if (node.children != null && node.children.length > 0){
-	   const node1: TodoItempNode[]  = node.children;
-	   node1.forEach(s=>{
-		 console.log(s);
-		 this.toggleChildred(s);
-		})
-    }
-*/
+
  }
 
   /* Checks all the parents when a leaf node is selected/unselected */
   checkAllParentsSelection(node: TodoItemFlatNode): void {
     let parent: TodoItemFlatNode | null = this.getParentNode(node);
+  
     while (parent) {
       this.checkRootNodeSelection(parent);
       parent = this.getParentNode(parent);
