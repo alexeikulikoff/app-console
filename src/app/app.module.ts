@@ -41,6 +41,8 @@ import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/materi
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { TreeChecklistExample } from './tree-checker/tree-checker.component';
 
+import { counterReducer } from './counter.reducer';
+import { MyCounterComponent } from './app-my-counter/app-my-counter.component';
 
 @NgModule({
   declarations: [
@@ -52,7 +54,8 @@ import { TreeChecklistExample } from './tree-checker/tree-checker.component';
     RolesComponent,
     EditRoleComponent,
     AddRoleComponent,
-    TreeChecklistExample
+    TreeChecklistExample,
+    MyCounterComponent
   ],
   imports: [
 
@@ -79,9 +82,11 @@ import { TreeChecklistExample } from './tree-checker/tree-checker.component';
 	FormsModule,
 	MatSortModule,
     MatCheckboxModule,
-	StoreModule.forRoot(reducers, {
+	StoreModule.forRoot(reducers,  {
       metaReducers
-    })
+    }),
+	StoreModule.forRoot({ count: counterReducer })
+
 
   ],
   providers: [

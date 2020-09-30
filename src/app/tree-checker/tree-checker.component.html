@@ -1,9 +1,15 @@
+<button type="submit" (click) = "loadDataNode">Load</button>
+
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
     <button mat-icon-button disabled></button>
-    <mat-checkbox class="checklist-leaf-node"
+    <mat-checkbox  class="checklist-leaf-node"
                   [checked]="checklistSelection.isSelected(node)"
-                  (change)="todoLeafItemSelectionToggle(node)">{{node.item}}</mat-checkbox>
+                  (change)="todoLeafItemSelectionToggle(node)">{{node.item}}
+                  
+                  
+     </mat-checkbox>
+   
   </mat-tree-node>
 
   <mat-tree-node *matTreeNodeDef="let node; when: hasNoContent" matTreeNodePadding>
@@ -26,6 +32,7 @@
                   [indeterminate]="descendantsPartiallySelected(node)"
                   (change)="todoItemSelectionToggle(node)">{{node.item}}</mat-checkbox>
     <button mat-icon-button (click)="addNewItem(node)"><mat-icon>add</mat-icon></button>
-  </mat-tree-node>
+    <input type="hidden" value={{node.p}}>
+     </mat-tree-node>
 </mat-tree>
 

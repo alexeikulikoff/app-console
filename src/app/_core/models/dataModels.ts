@@ -8,7 +8,7 @@ export interface MenuNode {
   so : number,
   url : string,
   q : string,
-  isOpen: boolean;
+  selected: boolean;
 }
 
 export interface MenuNodes extends Array<MenuNode>{}
@@ -33,7 +33,7 @@ export type MenuTree = {
 
 export type MenuTree2 = {
   item: string; 
-
+  p: string,
   children: MenuTree2[];
   
 }

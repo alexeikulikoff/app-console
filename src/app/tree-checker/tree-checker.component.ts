@@ -3,7 +3,7 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Injectable} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject, throwError, of} from 'rxjs';
-import { MenuNodes, MenuTree, MenuTree2 } from '../_core/models/dataModels';
+import { MenuNodes, MenuTree, MenuTree2, MenuNode } from '../_core/models/dataModels';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -18,14 +18,18 @@ const urlBaseMenu = '/api/guicontroller-auth/base/list';
  */
 export class TodoItemNode {
   children: TodoItemNode[];
+  p: string;
   item: string;
+  selected: boolean;
 }
 
 /** Flat to-do item node with expandable and level information */
 export class TodoItemFlatNode {
   item: string;
   level: number;
+  p: string;
   expandable: boolean;
+  selected: boolean;
 }
 
 /**
@@ -84,88 +88,26 @@ const TREE_DATA = {
  * Each node in Json object represents a to-do item or a category.
  * If a node is a category, it has children items and new items can be added under the category.
  */
-@Injectable()
-export class ChecklistDatabase {
-  dataChange = new BehaviorSubject<TodoItemNode[]>([]);
-
-  get data(): TodoItemNode[] { return this.dataChange.value; }
-
-  node1: TodoItemNode = new TodoItemNode();
-  constructor( private httpClient: HttpClient  ) {
-    this.initialize();
-  }
-  MENU_DATA2: MenuTree2 ={
- 	   	item: 'ROOT',
-    
-	    children: [],
-
-  }
-  initialize() {
-	
-    this.node1.item="root",
-    this.node1.children = [];
-
-	this.LoadBaseMenu( this.node1 );
-	
-/*	
-	 let arr = [];
-	 arr.push(this.node1);
-
-    const data = this.buildFileTree(TREE_DATA, 0);
-
-     console.log( arr );
-     console.log( data );
-  
-    this.dataChange.next(arr);
-*/
-  }
-  LoadBaseMenu( node: TodoItemNode ): void {
-
-    const http$ = this.httpClient.get<MenuNodes>(`${BASE_URL}${urlBaseMenu}`);
-    http$
-      .pipe(
-        map(res => res),
-        catchError(err => {
-          console.log('caught mapping error and rethrowing', err.status);
-          return throwError(err);
-        }),
-        catchError(err => {
-          console.log('caught rethrown error, providing fallback value', err);
-          return of([]);
-        })
-      )
-      .subscribe(
-		res => {
-			   this.fill(res, NULL , node );
- 				let arr = [];
-	 			arr.push(this.node1);
-			    this.dataChange.next(arr);
-			},
-		
-        err => console.log('HTTP Error', err),
-        () => console.log('HTTP request completed.')
-      )
-    ;
-  }
-
-  NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
+const  NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
     let arr =  menuNodes.filter(s => {
       return s.q === p;
     });
 	return arr;
   };
-  hasChild = (nodes: MenuNodes , p: string): boolean => {
+const  hasChild = (nodes: MenuNodes , p: string): boolean => {
     
 	return nodes.filter(s=> s.q === p).length > 0;
   };
 
-  fill = (data: MenuNodes, p: string, node: TodoItemNode) => {
+const  fill = (data: MenuNodes, p: string, node: TodoItemNode) => {
     
-	 this.NodeList(data, p).forEach( s => {
+	 NodeList(data, p).forEach( s => {
         const p1 = s.p;
         const n = new TodoItemNode();
 	       n.item = s.name,
-		   n.children = []
+		   n.children = [],
+           n.p = s.p
+		   n.selected = true;
        
 /*
         const nNode: MenuTree = {
@@ -184,10 +126,108 @@ export class ChecklistDatabase {
 //			nNode.children = [];
 //		}
 		node.children.push(n);
-        this.fill(data, p1, n );
+        fill(data, p1, n );
     });
 
   };
+
+@Injectable()
+export class ChecklistDatabase {
+ 
+
+  dataChange = new BehaviorSubject<TodoItemNode[]>([]);
+
+  get data(): TodoItemNode[] { return this.dataChange.value; }
+
+  node1: TodoItemNode = new TodoItemNode();
+ 
+  dbData: MenuNodes;
+
+ 
+
+  constructor( private httpClient: HttpClient  ) {
+   // this.initialize();
+  }
+  MENU_DATA2: MenuTree2 ={
+ 	   	item: 'ROOT',
+        p: '',
+	    children: [],
+
+  }
+
+  initialize() {
+	
+    this.node1.item="root",
+    this.node1.children = [];
+
+	this.LoadBaseMenu( this.node1 );
+	
+
+  }
+
+  refreshData( node: TodoItemNode ): void{
+	
+	const data: MenuNodes = this.dbData;
+	
+	const objIndex = data.findIndex(obj => obj.p === 'b8bdf1d8-f077-4c2d-9813-62988c9f5d3b');
+
+// make new object of updated object.   
+	const updatedObj = { ...data[objIndex], selected: false};
+
+// make final new array of objects by combining updated object.
+	const updatedData = [
+  						...data.slice(0, objIndex),
+  						updatedObj,
+  					   ...data.slice(objIndex + 1),
+	];
+			   
+	this.fill(updatedData, NULL , node );
+
+	console.log(updatedData);
+ 	let arr = [];
+	arr.push(this.node1);
+	this.dataChange.next(arr);
+   }
+
+  LoadBaseMenu( node: TodoItemNode ): void {
+
+    const http$ = this.httpClient.get<MenuNodes>(`${BASE_URL}${urlBaseMenu}`);
+    http$
+      .pipe(
+        map(res => res),
+        catchError(err => {
+          console.log('caught mapping error and rethrowing', err.status);
+          return throwError(err);
+        }),
+        catchError(err => {
+          console.log('caught rethrown error, providing fallback value', err);
+          return of([]);
+        })
+      )
+      .subscribe(
+		res => {
+			    this.dbData = res;
+  			
+ 			
+				this.fill( this.dbData, NULL , node );
+				console.log(res);
+				let arr = [];
+	 			arr.push(this.node1);
+			   
+
+			//	this.refreshData(this.node1);
+			
+				this.dataChange.next(arr);
+			},
+		
+        err => console.log('HTTP Error', err),
+        () => console.log('HTTP request completed.')
+      )
+    ;
+  }
+
+
+
 
   /**
    * Build the file structure tree. The `value` is the Json object, or a sub-tree of a Json object.
@@ -235,6 +275,8 @@ export class ChecklistDatabase {
   providers: [ChecklistDatabase]
 })
 export class TreeChecklistExample {
+	
+  beforeLoad: boolean;
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<TodoItemFlatNode, TodoItemNode>();
 
@@ -256,15 +298,17 @@ export class TreeChecklistExample {
   /** The selection for checklist */
   checklistSelection = new SelectionModel<TodoItemFlatNode>(true /* multiple */);
 
-  constructor(private _database: ChecklistDatabase) {
+  constructor(private _database: ChecklistDatabase, private httpClient: HttpClient ) {
+	
+	this.beforeLoad = true;
+	
     this.treeFlattener = new MatTreeFlattener(this.transformer, this.getLevel,
-      this.isExpandable, this.getChildren);
+    this.isExpandable, this.getChildren);
     this.treeControl = new FlatTreeControl<TodoItemFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-    _database.dataChange.subscribe(data => {
-      this.dataSource.data = data;
-    });
+  
+ 	//this.beforeLoad = false;
   }
 
   getLevel = (node: TodoItemFlatNode) => node.level;
@@ -285,21 +329,73 @@ export class TreeChecklistExample {
     const flatNode = existingNode && existingNode.item === node.item
         ? existingNode
         : new TodoItemFlatNode();
+
+  	flatNode.selected = node.selected;
+  	flatNode.p = node.p;
     flatNode.item = node.item;
     flatNode.level = level;
     flatNode.expandable = !!node.children?.length;
     this.flatNodeMap.set(flatNode, node);
     this.nestedNodeMap.set(node, flatNode);
+	
     return flatNode;
   }
 
+  loadDataNode():void{
+	
+	const http$ = this.httpClient.get<MenuNodes>(`${BASE_URL}${urlBaseMenu}`);
+    http$
+      .pipe(
+        map(res => res),
+        catchError(err => {
+          console.log('caught mapping error and rethrowing', err.status);
+          return throwError(err);
+        }),
+        catchError(err => {
+          console.log('caught rethrown error, providing fallback value', err);
+          return of([]);
+        })
+      )
+      .subscribe(
+		res => {
+			    this.dbData = res;
+  			
+ 			
+				this.fill( this.dbData, NULL , node );
+				console.log(res);
+				let arr = [];
+	 			arr.push(this.node1);
+			   
+
+			//	this.refreshData(this.node1);
+			
+				this.dataChange.next(arr);
+			},
+		
+        err => console.log('HTTP Error', err),
+        () => console.log('HTTP request completed.')
+      )
+    ;
+	
+	
+	console.log('load');
+	this._database.initialize();
+	this._database.dataChange.subscribe(data => {
+      this.dataSource.data = data;
+	  
+     });
+   }
   /** Whether all the descendants of the node are selected. */
   descendantsAllSelected(node: TodoItemFlatNode): boolean {
     const descendants = this.treeControl.getDescendants(node);
     const descAllSelected = descendants.length > 0 && descendants.every(child => {
-      return this.checklistSelection.isSelected(child);
+	
+      return this.checklistSelection.isSelected(child) || node.selected;
     });
-    return descAllSelected;
+	
+	 return descAllSelected ;
+	
+   
   }
 
   /** Whether part of the descendants are selected */
@@ -307,6 +403,7 @@ export class TreeChecklistExample {
     const descendants = this.treeControl.getDescendants(node);
     const result = descendants.some(child => this.checklistSelection.isSelected(child));
     return result && !this.descendantsAllSelected(node);
+
   }
 
   /** Toggle the to-do item selection. Select/deselect all the descendants node */
@@ -320,12 +417,16 @@ export class TreeChecklistExample {
     // Force update for the parent
     descendants.forEach(child => this.checklistSelection.isSelected(child));
     this.checkAllParentsSelection(node);
+	console.log(node);
+	
   }
 
   /** Toggle a leaf to-do item selection. Check all the parents to see if they changed */
   todoLeafItemSelectionToggle(node: TodoItemFlatNode): void {
     this.checklistSelection.toggle(node);
     this.checkAllParentsSelection(node);
+	//node.selected = !node.selected;
+	console.log(node);
   }
 
   /* Checks all the parents when a leaf node is selected/unselected */
@@ -342,7 +443,7 @@ export class TreeChecklistExample {
     const nodeSelected = this.checklistSelection.isSelected(node);
     const descendants = this.treeControl.getDescendants(node);
     const descAllSelected = descendants.length > 0 && descendants.every(child => {
-      return this.checklistSelection.isSelected(child);
+      return this.checklistSelection.isSelected(child) ;
     });
     if (nodeSelected && !descAllSelected) {
       this.checklistSelection.deselect(node);
