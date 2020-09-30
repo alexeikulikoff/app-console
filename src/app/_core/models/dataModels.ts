@@ -1,5 +1,10 @@
 
-
+export interface TempNode{
+	p: string;
+	q: string;
+	name: string;
+	selected: boolean;
+}
 export interface MenuNode {
   p: string,
   name: string;
