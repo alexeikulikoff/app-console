@@ -116,7 +116,10 @@ export class TreeChecklistExample {
 
   constructor( private httpClient: HttpClient ) {
 	this.node1 = new TodoItempNode();
+	this.node1.p = '00000000-0000-0000-0000-000000000000';
+	this.node1.q = 'NO';
 	this.node1.item="root",
+	this.node1.selected = true;
 	this.node1.children = [];
 	
     this.treeFlattener = new MatTreeFlattener(this.transformer, this.getLevel,
@@ -246,14 +249,11 @@ export class TreeChecklistExample {
  
   
   todoItemSelectionToggle(node: TodoItemFlatNode): void {
-	this.toggleChildred(node.p);
+	this.toggleChildred(node);
     this.checklistSelection.toggle(node);
     const descendants = this.treeControl.getDescendants(node);
     console.log(descendants);
-    console.log(node);
-	
-	
-	node.selected ? 
+ 	( node.selected && this.checklistSelection.isSelected(node) )? 
 				  this.checklistSelection.select(...descendants) : 
 				  this.checklistSelection.deselect(...descendants);
 	/*
@@ -268,8 +268,6 @@ export class TreeChecklistExample {
 	});
 		
     this.checkAllParentsSelection(node);
-
-  
 	
 	this.toggleParent(node.p);
 	
@@ -277,9 +275,15 @@ export class TreeChecklistExample {
 
   /** Toggle a leaf to-do item selection. Check all the parents to see if they changed */
   todoLeafItemSelectionToggle(node: TodoItemFlatNode): void {
+
+	const k = this.treeControl.dataNodes.findIndex((t => t.p == node.p));
+	this.treeControl.dataNodes[k].selected = !this.treeControl.dataNodes[k].selected;
+  
     this.checklistSelection.toggle(node);
     this.checkAllParentsSelection(node);
  	this.toggleParent(node.p);
+
+	
 
   }
   saveAll(){
@@ -299,16 +303,20 @@ export class TreeChecklistExample {
 	})
   }
 
-  toggleChildred = (p: string) => {
-	
-	const k = this.treeControl.dataNodes.findIndex((t => t.p == p));
+  toggleChildred = (node: TodoItemFlatNode) => {
+	const k = this.treeControl.dataNodes.findIndex((t => t.p == node.p));
 	this.treeControl.dataNodes[k].selected = !this.treeControl.dataNodes[k].selected;
 	
 	this.uuids = [];
-	this.findChildren(p);
+	this.findChildren(node.p);
 	this.uuids.forEach(u=>{
 		const i = this.treeControl.dataNodes.findIndex((t => t.p == u));
-		this.treeControl.dataNodes[i].selected = !this.treeControl.dataNodes[i].selected ;
+		if (!node.selected){
+			this.treeControl.dataNodes[i].selected = node.selected
+		}else{
+			this.treeControl.dataNodes[i].selected = !this.treeControl.dataNodes[i].selected ;	
+		}
+		
 	
 	})
    
