@@ -1,4 +1,4 @@
-<button type="submit" (click) = "loadDataNode">Load</button>
+<button type="submit" (click) = "refreshTree()">Load</button>
 
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
