@@ -13,10 +13,9 @@ export interface MenuNode {
   so : number,
   url : string,
   q : string,
-  selected: boolean;
+ 
 }
 
-export interface MenuNodes extends Array<MenuNode>{}
 
 export interface Role {
   id: string

@@ -3,7 +3,7 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Injectable} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject, throwError, of} from 'rxjs';
-import { MenuNodes, MenuTree, MenuTree2, MenuNode,  TempNode } from '../_core/models/dataModels';
+import { MenuTree, MenuTree2, MenuNode,  TempNode } from '../_core/models/dataModels';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
@@ -13,6 +13,7 @@ import { environment } from 'src/environments/environment';
 const NULL = '00000000-0000-0000-0000-000000000000';
 const BASE_URL = environment.serverUrl;
 const urlBaseMenu = '/api/guicontroller-auth/base/list';
+const urlPrefered = '/api/guicontroller-auth/prefered/list';
 /**
  * Node for to-do item
  */
@@ -41,33 +42,24 @@ export class TodoItemFlatNode {
  * Each node in Json object represents a to-do item or a category.
  * If a node is a category, it has children items and new items can be added under the category.
  */
-const  NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
-    let arr =  menuNodes.filter(s => {
-      return s.q === p;
-    });
-	return arr;
-  };
-const  hasChild = (nodes: MenuNodes , p: string): boolean => {
-    
-	return nodes.filter(s=> s.q === p).length > 0;
-  };
+const NodeList = (menuNodes: TempNode[], p: string): TempNode[] => {
+   return menuNodes.filter(s => s.q === p );
+ };
 
-const fill = (data: MenuNodes, p: string, node: TodoItempNode) => {
+const createTreeNode = (data: TempNode[], p: string, node: TodoItempNode) => {
     
 	 NodeList(data, p).forEach( s => {
         const p1 = s.p;
         const n = new TodoItempNode();
 	       n.item = s.name;
-		   n.children = [];
            n.p = s.p;
            n.q = s.q;
-		   n.selected = true;
- 		node.children.push(n);
-        fill(data, p1, n );
+		   n.selected = s.selected;
+		   n.children = [];
+ 		   node.children.push(n);
+        createTreeNode(data, p1, n );
     });
   };
-
-
 
 
 /**
@@ -105,14 +97,12 @@ export class TreeChecklistExample {
 
   node1: TodoItempNode ;
 
-  dbData: MenuNodes;
-
   dataChange = new BehaviorSubject<TodoItempNode[]>([]);
 
 
   get data(): TodoItempNode[] { return this.dataChange.value; }
 
-
+  uuids: string[];
 
   constructor( private httpClient: HttpClient ) {
 	this.node1 = new TodoItempNode();
@@ -135,7 +125,7 @@ export class TreeChecklistExample {
  	
   }
 
-  getLevel = (node: TodoItemFlatNode) => node.level;
+  getLevel = (node: TodoItemFlatNode) => node != null ?  node.level: 0;
 
   isExpandable = (node: TodoItemFlatNode) => node.expandable;
 
@@ -168,65 +158,55 @@ export class TreeChecklistExample {
 
   refreshTree():void{
 
-	this.loadDataNode(this.node1);
+	this.loadBaseMenu(this.node1);
 	this.treeControl.expandAll();
 	
   }
-  loadDataNode( node: TodoItempNode):void{
-	
-	const http$ = this.httpClient.get<MenuNodes>(`${BASE_URL}${urlBaseMenu}`);
-    http$
-      .pipe(
-        map(res => res),
-        catchError(err => {
-          console.log('caught mapping error and rethrowing', err.status);
-          return throwError(err);
-        }),
-        catchError(err => {
-          console.log('caught rethrown error, providing fallback value', err);
-          return of([]);
-        })
-      )
-      .subscribe(
-		res => {
-			this.dbData = res;
-		
-			this.updateNode(res,node);
-			this.setSelected();
-			},
-		
-        err => console.log('HTTP Error', err),
-        () => console.log('HTTP request completed.')
-      )
-    ;
-	
+  loadBaseMenu( node: TodoItempNode):void{
+	  const http$ = this.httpClient.get<MenuNode[]>(`${BASE_URL}${urlBaseMenu}`);
+      http$
+		.pipe(map(res => res))
+		.subscribe(res => this.prepareBaseMenu(res,node));
    }
- 
- 
-  getDataSourceItem(node: TodoItempNode, p:string): TodoItempNode{
-	  return null;
-  }
+   prepareBaseMenu(res: MenuNode[], node: TodoItempNode){
+	
+		const baseMenu = res.map(s=>{
+			return {...s, selected: false};
+		});
+		this.loadPreferedMenu(baseMenu, node);
+   }
+   loadPreferedMenu(baseMenu: MenuNode[], node: TodoItempNode):void{
+	
+	const http$ = this.httpClient.get<MenuNode[]>(`${BASE_URL}${urlPrefered}`);
+    http$
+      .pipe(map(res => res))
+      .subscribe(res => this.preparePreferedMenu(baseMenu, res, node));
+   }
 
-  setSelected(){
-	const tmp = this.dbData.map(d=>{
-		return {...d, selected: true}
-	});
-	this.dbData = tmp;
-  }
-  updateNode( data: MenuNodes, node: TodoItempNode ){
-		fill( data, NULL , node );
-		let arr = [];
-	 	arr.push(this.node1);
-		this.dataChange.next(arr);
-				
+	/**@abstract 
+	*
+	*   
+	* 
+	*/
+  preparePreferedMenu(baseMenu: MenuNode[], prefered: MenuNode[], node: TodoItempNode){
+	
+	 const data: TempNode[] = baseMenu.map(base=>{
+		return prefered.findIndex(s => s.p === base.p) > -1 ? { p: base.p, q: base.q, name: base.name, selected: true} : { p: base.p, q: base.q, name: base.name, selected: false}; 
+	 });
+	
+	createTreeNode( data, NULL , node );
+	const array: TodoItempNode[] = [];
+	this.node1.children.forEach(s=>{
+		array.push(s);
+	})
+	this.dataChange.next(array);
+	
   }
   
   /** Whether all the descendants of the node are selected. */
   descendantsAllSelected(node: TodoItemFlatNode): boolean {
     const descendants = this.treeControl.getDescendants(node);
-    
 	const descAllSelected = descendants.length > 0 && descendants.every(child => {
-	
       return this.checklistSelection.isSelected(child) ;
     });
 	  return descAllSelected ;
@@ -240,13 +220,6 @@ export class TreeChecklistExample {
     return result && !this.descendantsAllSelected(node);
 
   }
-  getSelectedNode(p: string){
-	const objIndex = this.dbData.findIndex((obj => obj.p === p)); 
-	return this.dbData[objIndex].selected;
-  }
-  /** Toggle the to-do item selection. Select/deselect all the descendants node */
-
- 
   
   todoItemSelectionToggle(node: TodoItemFlatNode): void {
 	this.toggleChildred(node);
@@ -285,34 +258,34 @@ export class TreeChecklistExample {
   
 	let parent: TodoItemFlatNode | null = this.getParentNode(node);
 	const descendants = this.treeControl.getDescendants(parent);
-	let flag: boolean = false;
 
-	const i1 = descendants.findIndex((t => t.p == node.p));
-	descendants[i1].selected = node.selected;
+	if (descendants != null && descendants.length > 0){
+		let flag: boolean = false;
+		const i1 = descendants.findIndex((t => t.p == node.p));
+		descendants[i1].selected = node.selected;
+		descendants.forEach(s=>{
+			if (s.selected) flag = true;
+		});
+		if (!flag){
+			
+			const j = this.treeControl.dataNodes.findIndex((t => t.p == parent.p));
+			this.treeControl.dataNodes[j].selected = flag;
+			this.checklistSelection.deselect(parent);
+		}
 
-	descendants.forEach(s=>{
-		if (s.selected) flag = true;
-	});
-	
-	if (!flag){
-		
-		const j = this.treeControl.dataNodes.findIndex((t => t.p == parent.p));
-		this.treeControl.dataNodes[j].selected = flag;
-		this.checklistSelection.deselect(parent);
 	}
-
-
+	
   }
   saveAll(){
 	this.treeControl.dataNodes.forEach(s=>{
-		if (!s.selected ){
+		if (s.selected ){
 		  console.log(s);	
 		}
 		
 	})
   }
   
-  uuids: string[];
+
 
   findChildren(p){
 	const list = this.treeControl.dataNodes.filter(s=>s.q === p);
@@ -326,7 +299,6 @@ export class TreeChecklistExample {
   toggleChildred = (node: TodoItemFlatNode) => {
 	const k = this.treeControl.dataNodes.findIndex((t => t.p == node.p));
 	this.treeControl.dataNodes[k].selected = !this.treeControl.dataNodes[k].selected;
-	
 	this.uuids = [];
 	this.findChildren(node.p);
 	this.uuids.forEach(u=>{
@@ -336,8 +308,6 @@ export class TreeChecklistExample {
 		}else{
 			this.treeControl.dataNodes[i].selected = !this.treeControl.dataNodes[i].selected ;	
 		}
-		
-	
 	})
    
  }
