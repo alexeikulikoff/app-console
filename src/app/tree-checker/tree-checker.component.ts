@@ -252,7 +252,7 @@ export class TreeChecklistExample {
 	this.toggleChildred(node);
     this.checklistSelection.toggle(node);
     const descendants = this.treeControl.getDescendants(node);
-    console.log(descendants);
+  
  	( node.selected && this.checklistSelection.isSelected(node) )? 
 				  this.checklistSelection.select(...descendants) : 
 				  this.checklistSelection.deselect(...descendants);
@@ -282,13 +282,33 @@ export class TreeChecklistExample {
     this.checklistSelection.toggle(node);
     this.checkAllParentsSelection(node);
  	this.toggleParent(node.p);
+  
+	let parent: TodoItemFlatNode | null = this.getParentNode(node);
+	const descendants = this.treeControl.getDescendants(parent);
+	let flag: boolean = false;
 
+	const i1 = descendants.findIndex((t => t.p == node.p));
+	descendants[i1].selected = node.selected;
+
+	descendants.forEach(s=>{
+		if (s.selected) flag = true;
+	});
 	
+	if (!flag){
+		
+		const j = this.treeControl.dataNodes.findIndex((t => t.p == parent.p));
+		this.treeControl.dataNodes[j].selected = flag;
+		this.checklistSelection.deselect(parent);
+	}
+
 
   }
   saveAll(){
 	this.treeControl.dataNodes.forEach(s=>{
-		console.log(s);
+		if (!s.selected ){
+		  console.log(s);	
+		}
+		
 	})
   }
   
