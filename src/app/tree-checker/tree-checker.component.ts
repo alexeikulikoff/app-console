@@ -2,11 +2,13 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Injectable} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
-import {BehaviorSubject, throwError, of} from 'rxjs';
-import { MenuTree, MenuTree2, MenuNode,  TempNode } from '../_core/models/dataModels';
+import {BehaviorSubject, throwError, of, Observable} from 'rxjs';
+import { MenuTree, MenuTree2, MenuNode,  TempNode, Roles } from '../_core/models/dataModels';
 import { HttpClient } from '@angular/common/http';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
+import { Validators, FormBuilder } from '@angular/forms';
+import { RoleService } from '../_core/services/api/roles/roles.service';
 
 
 
@@ -62,6 +64,8 @@ const createTreeNode = (data: TempNode[], p: string, node: TodoItempNode) => {
   };
 
 
+
+
 /**
  * @title Tree with checkboxes
  */
@@ -72,7 +76,14 @@ const createTreeNode = (data: TempNode[], p: string, node: TodoItempNode) => {
   providers: []
 })
 export class TreeChecklistExample {
-	
+  
+  rolMenuMapForm = this.fb.group({
+
+    role: [null, Validators.required],
+
+  });	
+  roles = [];
+
   flag: boolean;
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<TodoItemFlatNode, TodoItempNode>();
@@ -104,7 +115,7 @@ export class TreeChecklistExample {
 
   uuids: string[];
 
-  constructor( private httpClient: HttpClient ) {
+  constructor( private httpClient: HttpClient, private fb: FormBuilder, private roleService: RoleService, ) {
 	this.node1 = new TodoItempNode();
 	this.node1.p = '00000000-0000-0000-0000-000000000000';
 	this.node1.q = 'NO';
@@ -117,7 +128,12 @@ export class TreeChecklistExample {
     this.treeControl = new FlatTreeControl<TodoItemFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-    
+     roleService.getAllRoles().subscribe(r =>{ 
+		
+		this.roles = r;
+		console.log(this.roles);
+	 });
+ 
      this.dataChange.subscribe(data => {
       	this.dataSource.data = data;
 	});
@@ -284,10 +300,11 @@ export class TreeChecklistExample {
 		
 	})
   }
-  
+   change( event ): void{
+	 console.log(event);
+  }
 
-
-  findChildren(p){
+  findChildren(p: string){
 	const list = this.treeControl.dataNodes.filter(s=>s.q === p);
     list.forEach(u=>{
 		p = u.p;
@@ -358,17 +375,41 @@ export class TreeChecklistExample {
     }
     return null;
   }
+/** Add an item to to-do list
+  insertItem(parent: TodoItemNode, name: string) {
+    if (parent.children) {
+      parent.children.push({item: name} as TodoItemNode);
+      this.dataChange.next(this.data);
+    }
+  }
 
   /** Select the category so we can insert the new item. */
   addNewItem(node: TodoItemFlatNode) {
+	
     const parentNode = this.flatNodeMap.get(node);
-    //this._database.insertItem(parentNode!, '');
+    const value: TodoItempNode = {
+			p: '',
+			q: parentNode.p,
+			selected: false,
+			item: '',
+			children: []
+		}
+	parentNode.children.push(value);
+	this.dataChange.next(this.data);
     this.treeControl.expand(node);
+	
   }
 
   /** Save the node to database */
   saveNode(node: TodoItemFlatNode, itemValue: string) {
     const nestedNode = this.flatNodeMap.get(node);
+ 	console.log(nestedNode);
+	nestedNode.item = itemValue;
+	this.dataChange.next(this.data);
+ 
   //  this._database.updateItem(nestedNode!, itemValue);
+  }
+  onSubmit() {
+      console.log();
   }
 }

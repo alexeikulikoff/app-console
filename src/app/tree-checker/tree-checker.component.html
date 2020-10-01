@@ -1,6 +1,27 @@
 <button type="submit" (click) = "refreshTree()">Load</button>
 <button type="submit" (click) = "saveAll()">SAVE</button>
+<form [formGroup]="rolMenuMapForm" novalidate (ngSubmit)="onSubmit()">
+ <mat-card class="shipping-card">
+    <mat-card-header>
+      <mat-card-title>Привязка роли к  меню</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
 
+          <mat-form-field style="width:12vw">
+           <mat-label>Роль:</mat-label>
+            <mat-select  placeholder="Role" formControlName="role"  (ngModelChange)= "change($event)">
+              <mat-option *ngFor="let role of roles" [value]="role" >
+                {{ role.name }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="rolMenuMapForm.controls['role'].hasError('required')">
+              State is <strong>required</strong>
+            </mat-error>
+          </mat-form-field>
+
+    </mat-card-content>
+  </mat-card>
+ </form>
 <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
     <button mat-icon-button disabled></button>

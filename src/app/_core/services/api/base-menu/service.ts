@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MenuNodes } from '../../../models/dataModels';
+import { MenuNode } from '../../../models/dataModels';
 import { ApiService } from '../../sub/api.service';
 
 const rootPath = '/api/water_sources';
@@ -22,13 +22,13 @@ export class BaseMenuService {
 
  
 
-  public getBaseMenu(): Observable<MenuNodes> {
+  public getBaseMenu(): Observable<MenuNode[]> {
 	
 	var url: string ='/api/guicontroller-auth/base/list';
 	
     return this.api.get(url);
   }
-  public assignMenu(nodeid: string, roleid: string ): Observable<MenuNodes> {
+  public assignMenu(nodeid: string, roleid: string ): Observable<MenuNode[]> {
 	
 	var url: string ='/api/guicontroller-auth/base/assign?nodeid=' + nodeid + '&roleid=' + roleid;
 	

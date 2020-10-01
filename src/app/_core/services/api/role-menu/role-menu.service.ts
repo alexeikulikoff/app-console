@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { MenuNodes } from '../../../models/dataModels';
+import { MenuNode  } from '../../../models/dataModels';
 import { ApiService } from '../../sub/api.service';
 
 @Injectable({
@@ -12,7 +12,7 @@ export class RoleMenuService {
 	
  	}
 
-  public getRoleMenus(roleId: string): Observable<MenuNodes> {
+  public getRoleMenus(roleId: string): Observable<MenuNode[]> {
 	
 	var url: string ='/api/guicontroller-auth/role/' + roleId;
 	

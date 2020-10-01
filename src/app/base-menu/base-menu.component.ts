@@ -4,7 +4,7 @@ import { MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import { FormBuilder, Validators } from '@angular/forms';
 import { BaseMenuService } from '../_core/services/api/base-menu/service';
 import { RoleService } from '../_core/services/api/roles/roles.service';
-import { MenuNodes,  Roles } from '../../app/_core/models/dataModels';
+import { Roles, MenuNode } from '../../app/_core/models/dataModels';
 import { Observable } from 'rxjs';
 import { RoleMenuService } from '../../app/_core/services/api/role-menu/role-menu.service';
 import { ElementRef } from '@angular/core';
@@ -75,14 +75,14 @@ interface ExampleFlatNode {
 }
 
 
-const NodeList = (menuNodes: MenuNodes, p: string): MenuNodes => {
+const NodeList = (menuNodes: MenuNode[], p: string): MenuNode[] => {
 
     let arr =  menuNodes.filter(s => {
       return s.q === p;
     });
 	return arr;
 };
-const fill = (data: MenuNodes, p: string, node: NodeType) => {
+const fill = (data: MenuNode[], p: string, node: NodeType) => {
    NodeList(data, p).forEach( s => {
        const p1 = s.p;
        const newNode: NodeType = {	p: s.p,
@@ -114,14 +114,14 @@ export class BaseMenuComponent {
   roleId: string;
   menuId: string;
   menuMapId: string;
-  menuRoles : MenuNodes;
+  menuRoles : MenuNode[];
   flag: boolean;
   TREE_DATA = [];
-  data: MenuNodes;
+  data: MenuNode[];
 
   constructor(private el:ElementRef, private fb: FormBuilder,  private baseMenuService: BaseMenuService, private roleService: RoleService, private roleMenuService: RoleMenuService ) {
 
- 	const nodes: Observable<MenuNodes> =  baseMenuService.getBaseMenu();
+ 	const nodes: Observable<MenuNode[]> =  baseMenuService.getBaseMenu();
     const roleList: Observable<Roles> = roleService.getAllRoles();
  
 	roleList.subscribe(role => {
@@ -155,7 +155,7 @@ export class BaseMenuComponent {
 
     role: [null, Validators.required],
 
-  });
+ });
 
     hasUnitNumber = false;
 
@@ -216,7 +216,7 @@ export class BaseMenuComponent {
 	  TREE_DATA_MAP.splice(0,TREE_DATA_MAP.length);
 	  FoodNodeMap.children = [];
 
-	  const obsRoleMenus : Observable<MenuNodes> =  this.roleMenuService.getRoleMenus(roleid);
+	  const obsRoleMenus : Observable<MenuNode[]> =  this.roleMenuService.getRoleMenus(roleid);
 			obsRoleMenus.subscribe(rm => {
 
 				if (rm != null){
